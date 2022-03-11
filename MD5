@@ -1,0 +1,15 @@
+93c2449720e32e9f8904640ae46192cc *DESCRIPTION
+23377e865abd69626fefbc66749d67df *LICENSE
+0677cc0941fb9de6d153e389cdbe1907 *NAMESPACE
+97444e6c4257789fad9ca91c784f4acf *R/main.R
+cb8f4cf46652e524e69a14dcc3716bb6 *R/sysdata.rda
+056d570174c6a0ebcda74def75a7ffe2 *man/FI.ZI.Rd
+6df8adb3c55a21c81ac064035eb2ec44 *man/kstest.A.Rd
+cc5bc6dbbedfd08fac00523bdc1623e6 *man/kstest.B.Rd
+57ef351a8b0b24e3ece127dec9f3d69f *man/lrt.A.Rd
+dac4194243f5ca31772e864fa47fb8fc *man/lrt.B.Rd
+1ad408618dcdcba7030a9b59d53a1e79 *man/new.mle.Rd
+11f9e1443acfc61d39615016467f88e1 *man/ofp.Rd
+6c6d4289996661bd87bb6899f1513944 *man/sample.h1.Rd
+35fcaef9d52f4797f0e1bfab7d668f11 *man/sample.zi1.Rd
+2db2ba2d04daf8d3771edb51bef7e301 *man/zih.mle.Rd
