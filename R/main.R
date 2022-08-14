@@ -97,7 +97,7 @@
 #' x2=stats::rgeom(1000,prob=0.2)
 #' new.mle(x2,p=0.5,dist="geometric")                          #0.1963865 -2522.333
 #' x3=stats::rnbinom(1000,size=5,prob=0.3)
-#' new.mle(x3,r=2,p=0.6,dist="nb")                             #4.575147 0.281597 -3201.246
+#' new.mle(x3,r=2,p=0.6,dist="nb")                             #5.113298 0.3004412 -3186.163
 #' new.mle(x3,r=2,p=0.6,dist="nb1")                            #5 0.299904 -3202.223
 #' x4=extraDistr::rbbinom(1000,size=4,alpha=2,beta=3)
 #' new.mle(x4,n=10,alpha1=3,alpha2=4,dist="bb")                #3.99 1.78774 2.680009 -1533.982
@@ -115,36 +115,36 @@
 #' new.mle(x9,lambda=3,dist="exponential")                     #1.454471 -625.3576
 new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, lowerbound = 0.01, upperbound = 10000 )
 {
-  if(dist=="poisson")
+  if(dist == "poisson")
   {
-    N=length(x)
+    N = length(x)
     neg.log.lik<-function(y){
-      l1=y[1]
-      ans=-sum(x)*log(l1)+N*l1+sum(lgamma(x+1))
+      l1 = y[1]
+      ans = - sum(x) * log(l1) + N * l1 + sum(lgamma(x + 1))
       return(ans) }
     gp<-function(y){
-      l2=y[1]
-      dl=-sum(x)/l2 + N
+      l2 = y[1]
+      dl = - sum(x) / l2 + N
       return(dl)}
-    estimate= stats::optim(par=lambda,fn=neg.log.lik, gr=gp, method="L-BFGS-B",lower=lowerbound,upper=upperbound)
-    mle = matrix(c(estimate$par[1],-estimate$value),nrow=1)
+    estimate= stats::optim(par = lambda, fn = neg.log.lik, gr = gp, method = "L-BFGS-B", lower = lowerbound, upper = upperbound)
+    mle = matrix(c(estimate$par[1], -estimate$value), nrow=1)
     colnames(mle) = c("lambda", "loglik")
     return(mle)
   }
-  if(dist=="geometric")
+  if(dist == "geometric")
   {
-    N=length(x)
+    N = length(x)
     neg.log.lik<-function(y){
-      l1=y[1]
-      ans = -sum(x) * log(1-l1) - N * log(l1)
+      l1 = y[1]
+      ans = -sum(x) * log(1 - l1) - N * log(l1)
       return(ans) }
     gp<-function(y){
-      l2=y[1]
-      dl = sum(x)/(1-l2) - N/l2
+      l2 = y[1]
+      dl = sum(x)/(1 - l2) - N/l2
       return(dl)}
-    estimate= stats::optim(par=p,fn=neg.log.lik, gr=gp, method="L-BFGS-B",lower=lowerbound,upper=1-lowerbound)
-    mle = matrix(c(estimate$par[1],-estimate$value),nrow=1)
-    colnames(mle) = c("p", "loglik")
+    estimate = stats::optim(par = p, fn = neg.log.lik, gr = gp, method = "L-BFGS-B", lower = lowerbound, upper = 1-lowerbound)
+    mle = matrix(c(estimate$par[1], -estimate$value), nrow=1)
+    colnames(mle) = c("p" , "loglik")
     return(mle)
   }
   if(dist=="nb")
@@ -205,7 +205,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     colnames(mle) = c("r","p", "loglik")
     return(mle)
   }
-  if(dist=="bb")
+  if(dist == "bb")
   {
     N = length(x)
     neg.log.lik <- function(y) {
@@ -213,26 +213,26 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       a1 = y[2]
       b1 = y[3]
       ans = -N * lgamma(n1 + 1) - N * lgamma(a1 + b1) + N * lgamma(a1) +
-        N * lgamma(b1) + N * lgamma(n1 + a1 + b1) - sum(lgamma(x + a1))-
-        sum(lgamma(n1 - x + b1)) + sum(lgamma(x + 1)) +sum(lgamma(n1 - x + 1))
+        N * lgamma(b1) + N * lgamma(n1 + a1 + b1) - sum(lgamma(x + a1)) -
+        sum(lgamma(n1 - x + b1)) + sum(lgamma(x + 1)) + sum(lgamma(n1 - x + 1))
       return(ans)
     }
     gp <- function(y) {
       n2 = y[1]
       a2 = y[2]
       b2 = y[3]
-      dn = -N * digamma(n2 + 1) + N * digamma(a2 + n2 + b2)-sum(digamma(n2 - x + b2)) + sum(digamma(n2 - x +  1))
-      da = -N * digamma(a2 + b2) + N * digamma(a2) +N * digamma(n2 + a2 + b2) - sum(digamma(x + a2))
-      db = -N * digamma(a2 + b2) + N * digamma(b2)+N * digamma(n2 + a2 + b2) - sum(digamma(n2 - x + b2))
+      dn = -N * digamma(n2 + 1) + N * digamma(a2 + n2 + b2) - sum(digamma(n2 - x + b2)) + sum(digamma(n2 - x +  1))
+      da = -N * digamma(a2 + b2) + N * digamma(a2) + N * digamma(n2 + a2 + b2) - sum(digamma(x + a2))
+      db = -N * digamma(a2 + b2) + N * digamma(b2) + N * digamma(n2 + a2 + b2) - sum(digamma(n2 - x + b2))
       return(c(dn, da, db))
     }
     estimate = stats::optim(par = c(n,alpha1,alpha2), fn = neg.log.lik,
                             gr = gp, method = "L-BFGS-B", lower = c(max(x) - lowerbound,lowerbound, lowerbound), upper = c(upperbound, upperbound, upperbound))
-    mle = matrix(c(estimate$par[1], estimate$par[2], estimate$par[3],-estimate$value), nrow = 1)
+    mle = matrix(c(estimate$par[1], estimate$par[2], estimate$par[3], -estimate$value), nrow = 1)
     colnames(mle) = c("n", "Alpha", "Beta", "loglik")
     return(mle)
   }
-  if(dist=="bb1")
+  if(dist == "bb1")
   { #return integer n
     N = length(x)
     neg.log.lik <- function(y) {
@@ -248,9 +248,9 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       n2 = y[1]
       a2 = y[2]
       b2 = y[3]
-      dn = -N * digamma(n2 + 1) + N * digamma(a2 + n2 + b2)-sum(digamma(n2 - x + b2)) + sum(digamma(n2 - x +  1))
-      da = -N * digamma(a2 + b2) + N * digamma(a2) +N * digamma(n2 + a2 + b2) - sum(digamma(x + a2))
-      db = -N * digamma(a2 + b2) + N * digamma(b2)+N * digamma(n2 + a2 + b2) - sum(digamma(n2 - x + b2))
+      dn = -N * digamma(n2 + 1) + N * digamma(a2 + n2 + b2) - sum(digamma(n2 - x + b2)) + sum(digamma(n2 - x +  1))
+      da = -N * digamma(a2 + b2) + N * digamma(a2) + N * digamma(n2 + a2 + b2) - sum(digamma(x + a2))
+      db = -N * digamma(a2 + b2) + N * digamma(b2) + N * digamma(n2 + a2 + b2) - sum(digamma(n2 - x + b2))
       return(c(dn, da, db))
     }
     estimate = stats::optim(par = c(n,alpha1,alpha2), fn = neg.log.lik,
@@ -261,7 +261,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       a1 = y[1]
       b1 = y[2]
       ans = -N * lgamma(nnew + 1) - N * lgamma(a1 + b1) + N * lgamma(a1) +
-        N * lgamma(b1) + N * lgamma(nnew + a1 + b1) - sum(lgamma(x + a1))-
+        N * lgamma(b1) + N * lgamma(nnew + a1 + b1) - sum(lgamma(x + a1)) -
         sum(lgamma(nnew - x + b1)) + sum(lgamma(x + 1)) +sum(lgamma(nnew - x + 1))
       return(ans)
     }
@@ -274,11 +274,11 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     }
     estimate1 = stats::optim(par = c(alpha1,alpha2), fn = neg.log.lik1,
                              gr = gp1, method = "L-BFGS-B", lower = c(lowerbound, lowerbound), upper = c(upperbound, upperbound))
-    mle = matrix(c(nnew, estimate1$par[1], estimate1$par[2],-estimate1$value), nrow = 1)
+    mle = matrix(c(nnew, estimate1$par[1], estimate1$par[2], -estimate1$value), nrow = 1)
     colnames(mle) = c("n", "Alpha", "Beta", "loglik")
     return(mle)
   }
-  if(dist=="bnb")
+  if(dist == "bnb")
   {
     N = length(x)
     neg.log.lik <- function(y) {
@@ -286,8 +286,8 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       a1 = y[2]
       b1 = y[3]
       ans = -N * lgamma(a1 + r1) - N * lgamma(a1 + b1) +
-        N * lgamma(r1) + N * lgamma(a1) + N * lgamma(b1)-
-        sum(lgamma(x + r1)) - sum(lgamma(x + b1)) + sum(lgamma(x + 1))+
+        N * lgamma(r1) + N * lgamma(a1) + N * lgamma(b1) -
+        sum(lgamma(x + r1)) - sum(lgamma(x + b1)) + sum(lgamma(x + 1)) +
         sum(lgamma(a1 + r1 + b1 + x))
       return(ans)
     }
@@ -300,7 +300,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       da = -N * digamma(a2 + r2) - N * digamma(a2 + b2) +
         N * digamma(a2) + sum(digamma(a2 + r2 + b2 + x))
       db = -N * digamma(a2 + b2) + N * digamma(b2) -
-        sum(digamma(b2 +  x)) + sum(digamma(a2 + r2 + b2 + x))
+        sum(digamma(b2 + x)) + sum(digamma(a2 + r2 + b2 + x))
       return(c(dr, da, db))
     }
     estimate = stats::optim(par = c(r,alpha1,alpha2), fn = neg.log.lik,
@@ -310,7 +310,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     colnames(mle) = c("r", "Alpha", "Beta", "loglik")
     return(mle)
   }
-  if(dist=="bnb1")
+  if(dist == "bnb1")
   { #return integer r
     N = length(x)
     neg.log.lik <- function(y) {
@@ -318,8 +318,8 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       a1 = y[2]
       b1 = y[3]
       ans = -N * lgamma(a1 + r1) - N * lgamma(a1 + b1) +
-        N * lgamma(r1) + N * lgamma(a1) + N * lgamma(b1)-
-        sum(lgamma(x + r1)) - sum(lgamma(x + b1)) + sum(lgamma(x + 1))+
+        N * lgamma(r1) + N * lgamma(a1) + N * lgamma(b1) -
+        sum(lgamma(x + r1)) - sum(lgamma(x + b1)) + sum(lgamma(x + 1)) +
         sum(lgamma(a1 + r1 + b1 + x))
       return(ans)
     }
@@ -332,7 +332,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       da = -N * digamma(a2 + r2) - N * digamma(a2 + b2) +
         N * digamma(a2) + sum(digamma(a2 + r2 + b2 + x))
       db = -N * digamma(a2 + b2) + N * digamma(b2) -
-        sum(digamma(b2 +  x)) + sum(digamma(a2 + r2 + b2 + x))
+        sum(digamma(b2 + x)) + sum(digamma(a2 + r2 + b2 + x))
       return(c(dr, da, db))
     }
     estimate = stats::optim(par = c(r,alpha1,alpha2), fn = neg.log.lik,
@@ -343,16 +343,14 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
       a1 = y[1]
       b1 = y[2]
       ans1 = -N * lgamma(a1 + rnew) - N * lgamma(a1 + b1) +
-        N * lgamma(rnew) + N * lgamma(a1) + N * lgamma(b1)-
-        sum(lgamma(x + rnew)) - sum(lgamma(x + b1)) + sum(lgamma(x + 1))+
+        N * lgamma(rnew) + N * lgamma(a1) + N * lgamma(b1) -
+        sum(lgamma(x + rnew)) - sum(lgamma(x + b1)) + sum(lgamma(x + 1)) +
         sum(lgamma(a1 + rnew + b1 + x))
       return(ans1)
     }
     gp1 <- function(y) {
       a2 = y[1]
       b2 = y[2]
-      #dr = -N * digamma(a2 + r2) + N * digamma(r2) -
-      # sum(digamma(r2 + x)) + sum(digamma(a2 + r2 + b2 + x))
       da1 = -N * digamma(a2 + rnew) - N * digamma(a2 + b2) +
         N * digamma(a2) + sum(digamma(a2 + rnew + b2 + x))
       db1 = -N * digamma(a2 + b2) + N * digamma(b2) -
@@ -365,7 +363,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     colnames(mle) = c("r", "Alpha", "Beta", "loglik")
     return(mle)
   }
-  if(dist=="normal")
+  if(dist == "normal")
   {
     N = length(x)
     neg.log.lik <- function(y) {
@@ -388,7 +386,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     colnames(mle) = c("mean", "sigma", "loglik")
     return(mle)
   }
-  if(dist=="lognormal")
+  if(dist == "lognormal")
   {
     N = length(x)
     x=x[x>0]
@@ -412,9 +410,8 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     mle = matrix(c(estimate$par[1], estimate$par[2], -estimate$value), nrow = 1)
     colnames(mle) = c("mean", "sigma", "loglik")
     return(mle)
-
   }
-  if(dist=="halfnormal")
+  if(dist == "halfnormal")
   {
     N = length(x)
     neg.log.lik <- function(y) {
@@ -432,7 +429,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     colnames(mle) = c("sigma", "loglik")
     return(mle)
   }
-  if(dist=="exponential")
+  if(dist == "exponential")
   {
     N = length(x)
     x=x[x>=0]
@@ -452,7 +449,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     return(mle)
   }
 }
-library(rmutil);library(foreach);library(extraDistr);library(matrixcalc);library(base);library(corpcor);library(dplyr);
+library(rmutil);library(foreach);library(extraDistr);library(matrixcalc);library(base);library(corpcor);library(dplyr);library(Rcpp);
 
 #' Maximum likelihood estimate for Zero-Inflated or Zero-Altered discrete and continuous distributions.
 #' @description Calculate the Maximum likelihood estimate and the corresponding negative log likelihood value for
@@ -619,7 +616,7 @@ library(rmutil);library(foreach);library(extraDistr);library(matrixcalc);library
 #' #4 3.028185 3.756225 0.328 -5274.092
 #' y6=sample.h1(2000,phi=0.3,dist="normal",mean=10,sigma=2)
 #' zih.mle(y6,mean=2,sigma=2,dist="normal.zihmle",type="h")
-#' #10.04307 1.986102 0.29 -4201.544
+#' #10.01252 1.996997 0.29 -4201.334
 #' y7=sample.h1(2000,phi=0.3,dist="lognormal",mean=1,sigma=4)
 #' zih.mle(y7,mean=4,sigma=2,dist="lognorm.zihmle",type="h")
 #' #0.9305549 3.891624 0.287 -6486.92
@@ -631,7 +628,7 @@ library(rmutil);library(foreach);library(extraDistr);library(matrixcalc);library
 #' #20.26938 0.2905 1645.731
 zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type = c("zi", "h"), dist, lowerbound = 0.01, upperbound = 10000 )
 {
-  if (dist=="poisson.zihmle")
+  if (dist == "poisson.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -700,7 +697,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     }
   }
-  if (dist=="geometric.zihmle")
+  if (dist == "geometric.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -768,7 +765,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     }
   }
-  if (dist=="nb.zihmle")
+  if (dist == "nb.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -846,7 +843,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     }
   }
-  if (dist=="nb1.zihmle")
+  if (dist == "nb1.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -954,7 +951,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     }
   }
-  if (dist=="bb.zihmle")
+  if (dist == "bb.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -967,8 +964,8 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       logA = lgamma(a1 + n1 + b1) + lgamma(b1)
       logB = lgamma(a1 + b1) + lgamma(n1 + b1)
       ans = m * log(1 - exp(logB - logA)) + m * logA-
-        m *lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1))-
-        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1))+ sum(lgamma(t + 1))+m * lgamma(a1)
+        m *lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1)) -
+        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1)) + sum(lgamma(t + 1)) +m * lgamma(a1)
       return(ans)
     }
     gp <- function(y)
@@ -978,11 +975,11 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       b1 = y[3]
       logA = lgamma(a1 + n1 + b1) + lgamma(b1)
       logB = lgamma(a1 + b1) + lgamma(n1 + b1)
-      dn = -m * exp(logB - logA) * (digamma(n1 + b1) -digamma(a1 +n1 + b1))/(1 - exp(logB - logA))+m * digamma(a1 + n1 + b1)-
-        m * digamma(n1 + 1) - sum(digamma(n1 + b1 - t)) + sum(digamma(n1 -t + 1))
-      da = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + n1 + b1))/(1 - exp(logB - logA)) + m * digamma(a1 + n1 + b1)-
+      dn = -m * exp(logB - logA) * (digamma(n1 + b1) - digamma(a1 + n1 + b1))/(1 - exp(logB - logA))+m * digamma(a1 + n1 + b1) -
+        m * digamma(n1 + 1) - sum(digamma(n1 + b1 - t)) + sum(digamma(n1 - t + 1))
+      da = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + n1 + b1))/(1 - exp(logB - logA)) + m * digamma(a1 + n1 + b1) -
         sum(digamma(t + a1)) - m * digamma(a1 + b1)+ m * digamma(a1)
-      db = -m * exp(logB - logA) * (digamma(a1 + b1) + digamma(n1 + b1) - digamma(a1 + n1 + b1) - digamma(b1))/(1 - exp(logB -logA)) +
+      db = -m * exp(logB - logA) * (digamma(a1 + b1) + digamma(n1 + b1) - digamma(a1 + n1 + b1) - digamma(b1))/(1 - exp(logB - logA)) +
         m * digamma(b1) + m * digamma(a1 + n1 + b1)- sum(digamma(n1 - t + b1))-m * digamma(a1 + b1)
       return(c(dn, da, db))
     }
@@ -997,10 +994,10 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       n1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      ans1 = -m *lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1))-
-        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1))+ sum(lgamma(t + 1))+
-        sum(lgamma(t+1))+m*lgamma(n1+a1+b1)+m * lgamma(a1)+m*lgamma(b1)-
-        N-m*(lgamma(n1+b1)-lgamma(n1+a1+b1)+lgamma(n1+b1)+lgamma(b1))
+      ans1 = -m * lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1)) -
+        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1)) + sum(lgamma(t + 1)) +
+        m * lgamma(n1 + a1 + b1) + m * lgamma(a1) + m * lgamma(b1) -
+        (N - m) *lgamma(n1+b1) - (N - m) * lgamma(a1 + b1) + (N - m) * lgamma(n1 + a1 + b1) + (N - m) * lgamma(b1)
       return(ans1)
     }
     gp1 <- function(y)
@@ -1008,12 +1005,12 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       n1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      dn1 = -m * digamma(n1 + 1) - sum(digamma(n1-t+b1)) + sum(digamma(n1 -t + 1))+m*digamma(n1+a1+b1)+
-        (N-m)*(-digamma(n1+b1)-digamma(n1+a1+b1)+digamma(n1+b1))
-      da1 = -sum(digamma(t+a1))- m * digamma(a1 + b1)+ m*digamma(n1+a1+b1)+ m * digamma(a1)-
-        (N-m)*digamma(n1+a1+b1)
-      db1 = -sum(digamma(n1-t+ b1)) - m* digamma(a1+b1) + m * digamma(a1 + n1 + b1) + m * digamma(b1)+
-        (N-m)*(-digamma(n1+b1)-digamma(n1+a1+b1)+digamma(n1+b1)+digamma(b1))
+      dn1 = -m * digamma(n1 + 1) - sum(digamma(n1 - t + b1)) + sum(digamma(n1 - t + 1)) + m*digamma(n1 + a1 + b1) +
+        (N - m) * digamma(n1 + a1 + b1) - (N - m) * digamma(n1 + b1)
+      da1 = -sum(digamma(t + a1)) - m * digamma(a1 + b1) + m * digamma(n1 + a1 + b1) + m * digamma(a1) -
+        (N - m) * digamma(a1 + b1) + (N - m)*digamma(n1 + a1 + b1)
+      db1 = -sum(digamma(n1 - t + b1)) - m* digamma(a1 + b1) + m * digamma(a1 + n1 + b1) + m * digamma(b1) +
+        (N - m) * digamma(n1 + a1 + b1) + (N - m) * digamma(b1) - (N - m)* digamma(a1 + b1) - (N - m)* digamma(n1 + b1)
       return(c(dn1, da1, db1))
     }
     estimate1 = stats::optim(par = c(n, alpha1, alpha2), fn = neg.log.lik1,
@@ -1030,29 +1027,29 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       mle = matrix(c(ans[1], ans[2], ans[3], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (!is.na(p0) && (m/N) <= (1-p0) && type=="zi")
+    } else if (!is.na(p0) && (m/N) <= (1-p0) && type == "zi")
     {
       phi=1-m/N/(1-p0)
       lik = -fvalue + (N - m) * log(1 - m/N) + m * log(m/N)
       mle = matrix(c(ans[1], ans[2], ans[3], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    }else if (!is.na(p0) && (m/N) > (1-p0) && type=="zi")
+    }else if (!is.na(p0) && (m/N) > (1-p0) && type == "zi")
     {
-      psi=min(m/N,(1-p1))
-      phi=(1-psi)/(1-p1)
-      lik=-fvalue1+(N-m)*log(1-psi)+m*log(psi)
+      psi = min(m/N, (1 - p1))
+      phi = (1 - psi)/(1 - p1)
+      lik = -fvalue1 + (N - m) * log(1 - psi) + m * log(psi)
       mle = matrix(c(ans1[1], ans1[2], ans1[3], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
     } else
       warning("cannot obtain mle with the current model type, the output estimate is derived from general beta binomial distribution.")
-    ans = new.mle(x, n, alpha1, alpha2, lowerbound, upperbound, dist="bb")
+    ans = new.mle(x, n, alpha1, alpha2, lowerbound, upperbound, dist = "bb")
     mle = matrix(c(ans[1], ans[2], ans[3], 0, ans[4]), nrow = 1)
     colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
     return(mle)
   }
-  if (dist=="bb1.zihmle")
+  if (dist == "bb1.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -1064,9 +1061,9 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       b1 = y[3]
       logA = lgamma(a1 + n1 + b1) + lgamma(b1)
       logB = lgamma(a1 + b1) + lgamma(n1 + b1)
-      ans = m * log(1 - exp(logB - logA)) + m * logA-
-        m *lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1))-
-        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1))+ sum(lgamma(t + 1))+m * lgamma(a1)
+      ans = m * log(1 - exp(logB - logA)) + m * logA -
+        m *lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1)) -
+        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1)) + sum(lgamma(t + 1)) + m * lgamma(a1)
       return(ans)
     }
     gp <- function(y)
@@ -1076,28 +1073,28 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       b1 = y[3]
       logA = lgamma(a1 + n1 + b1) + lgamma(b1)
       logB = lgamma(a1 + b1) + lgamma(n1 + b1)
-      dn = -m * exp(logB - logA) * (digamma(n1 + b1) -digamma(a1 +n1 + b1))/(1 - exp(logB - logA))+m * digamma(a1 + n1 + b1)-
+      dn = -m * exp(logB - logA) * (digamma(n1 + b1) -digamma(a1 +n1 + b1))/(1 - exp(logB - logA)) + m * digamma(a1 + n1 + b1) -
         m * digamma(n1 + 1) - sum(digamma(n1 - t + b1)) + sum(digamma(n1 -t + 1))
-      da = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + n1 + b1))/(1 - exp(logB - logA)) + m * digamma(a1 + n1 + b1)-
-        sum(digamma(t + a1)) - m * digamma(a1 + b1)+ m * digamma(a1)
+      da = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + n1 + b1))/(1 - exp(logB - logA)) + m * digamma(a1 + n1 + b1) -
+        sum(digamma(t + a1)) - m * digamma(a1 + b1) + m * digamma(a1)
       db = -m * exp(logB - logA) * (digamma(a1 + b1) + digamma(n1 + b1) - digamma(a1 + n1 + b1) - digamma(b1))/(1 - exp(logB -logA)) +
-        m * digamma(b1) + m * digamma(a1 + n1 + b1)- sum(digamma(n1 - t + b1))-m * digamma(a1 + b1)
+        m * digamma(b1) + m * digamma(a1 + n1 + b1) - sum(digamma(n1 - t + b1)) - m * digamma(a1 + b1)
       return(c(dn, da, db))
     }
     estimate = stats::optim(par = c(n, alpha1, alpha2), fn = neg.log.lik,
                             gr = gp, method = "L-BFGS-B", lower = c(max(x),
                                                                     lowerbound, lowerbound), upper = c(upperbound, upperbound, upperbound))
     ans = estimate$par
-    nnew = max(1,round(ans[1]))
+    nnew = max(1, round(ans[1]))
     neg.log.liknew <- function(y)
     {
       a1 = y[1]
       b1 = y[2]
       logA = lgamma(a1 + nnew + b1) + lgamma(b1)
       logB = lgamma(a1 + b1) + lgamma(nnew + b1)
-      ans = m * log(1 - exp(logB - logA)) + m * logA-
-        m *lgamma(nnew + 1) - sum(lgamma(t + a1)) - sum(lgamma(nnew - t + b1))-
-        m * lgamma(a1 + b1) + sum(lgamma(nnew - t + 1))+ sum(lgamma(t + 1))+m * lgamma(a1)
+      ans = m * log(1 - exp(logB - logA)) + m * logA -
+        m *lgamma(nnew + 1) - sum(lgamma(t + a1)) - sum(lgamma(nnew - t + b1)) -
+        m * lgamma(a1 + b1) + sum(lgamma(nnew - t + 1)) + sum(lgamma(t + 1)) + m * lgamma(a1)
       return(ans)
     }
     gpnew <- function(y)
@@ -1106,26 +1103,26 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       b1 = y[2]
       logA = lgamma(a1 + nnew + b1) + lgamma(b1)
       logB = lgamma(a1 + b1) + lgamma(nnew + b1)
-      da = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + nnew + b1))/(1 - exp(logB - logA)) + m * digamma(a1 + nnew + b1)-
+      da = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + nnew + b1))/(1 - exp(logB - logA)) + m * digamma(a1 + nnew + b1) -
         sum(digamma(t + a1)) - m * digamma(a1 + b1)+ m * digamma(a1)
       db = -m * exp(logB - logA) * (digamma(a1 + b1) + digamma(nnew + b1) - digamma(a1 + nnew + b1) - digamma(b1))/(1 - exp(logB -logA)) +
-        m * digamma(b1) + m * digamma(a1 + nnew + b1)- sum(digamma(nnew - t + b1))-m * digamma(a1 + b1)
+        m * digamma(b1) + m * digamma(a1 + nnew + b1) - sum(digamma(nnew - t + b1)) - m * digamma(a1 + b1)
       return(c(da, db))
     }
     estimatenew = stats::optim(par = c(alpha1, alpha2), fn = neg.log.liknew,
                                gr = gpnew, method = "L-BFGS-B", lower = c(lowerbound, lowerbound), upper = c(upperbound, upperbound))
     ansnew=estimatenew$par
     fvalue = estimatenew$value
-    p0 = exp(base::lbeta(ansnew[1], nnew + ansnew[2])-base::lbeta(ansnew[1], ansnew[2]))
+    p0 = exp(base::lbeta(ansnew[1], nnew + ansnew[2]) - base::lbeta(ansnew[1], ansnew[2]))
     neg.log.lik1 <- function(y)
     {
       n1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      ans1 = -m *lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1))-
-        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1))+ sum(lgamma(t + 1))+
-        sum(lgamma(t+1))+m*lgamma(n1+a1+b1)+m * lgamma(a1)+m*lgamma(b1)-
-        N-m*(lgamma(n1+b1)-lgamma(n1+a1+b1)+lgamma(n1+b1)+lgamma(b1))
+      ans1 = -m *lgamma(n1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(n1 - t + b1)) -
+        m * lgamma(a1 + b1) + sum(lgamma(n1 - t + 1)) + sum(lgamma(t + 1)) +
+        m*lgamma(n1 + a1 + b1) + m * lgamma(a1) + m*lgamma(b1) -
+        (N - m) * lgamma(n1+b1) - (N - m) * lgamma(a1 + b1) + (N - m) * lgamma(n1 + a1 + b1) + (N - m) * lgamma(b1)
       return(ans1)
     }
     gp1 <- function(y)
@@ -1133,12 +1130,12 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       n1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      dn1 = -m * digamma(n1 + 1) - sum(digamma(n1-t+b1)) + sum(digamma(n1 -t + 1))+m*digamma(n1+a1+b1)+
-        (N-m)*(-digamma(n1+b1)-digamma(n1+a1+b1)+digamma(n1+b1))
-      da1 = -sum(digamma(t+a1))- m * digamma(a1 + b1)+ m*digamma(n1+a1+b1)+ m * digamma(a1)-
-        (N-m)*digamma(n1+a1+b1)
-      db1 = -sum(digamma(n1-t+ b1)) - m* digamma(a1+b1) + m * digamma(a1 + n1 + b1) + m * digamma(b1)+
-        (N-m)*(-digamma(n1+b1)-digamma(n1+a1+b1)+digamma(n1+b1)+digamma(b1))
+      dn1 = -m * digamma(n1 + 1) - sum(digamma(n1 - t + b1)) + sum(digamma(n1 - t + 1)) + m*digamma(n1 + a1 + b1) +
+        (N - m) * digamma(n1 + a1 + b1) - (N - m) * digamma(n1 + b1)
+      da1 = -sum(digamma(t + a1)) - m * digamma(a1 + b1) + m*digamma(n1 + a1 + b1) + m * digamma(a1) -
+        (N-m)* digamma(a1 + b1) + (N - m)*digamma(n1 + a1 + b1)
+      db1 = -sum(digamma(n1 - t+ b1)) - m * digamma(a1+b1) + m * digamma(a1 + n1 + b1) + m * digamma(b1) +
+        (N - m)*digamma(n1 + a1 + b1) + (N - m) * digamma(b1) -(N - m) * digamma(a1 + b1) - (N - m) * digamma(n1 + b1)
       return(c(dn1, da1, db1))
     }
     estimate1 = stats::optim(par = c(n, alpha1, alpha2), fn = neg.log.lik1,
@@ -1150,20 +1147,20 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
     {
       a1 = y[1]
       b1 = y[2]
-      ans1 = -m *lgamma(nnew1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(nnew1 - t + b1))-
-        m * lgamma(a1 + b1) + sum(lgamma(nnew1 - t + 1))+ sum(lgamma(t + 1))+
-        sum(lgamma(t+1))+m*lgamma(nnew1+a1+b1)+m * lgamma(a1)+m*lgamma(b1)-
-        N-m*(lgamma(nnew1+b1)-lgamma(nnew1+a1+b1)+lgamma(nnew1+b1)+lgamma(b1))
+      ans1 = -m *lgamma(nnew1 + 1) - sum(lgamma(t + a1)) - sum(lgamma(nnew1 - t + b1)) -
+        m * lgamma(a1 + b1) + sum(lgamma(nnew1 - t + 1)) + sum(lgamma(t + 1)) +
+        m * lgamma(nnew1 + a1 + b1) + m * lgamma(a1) + m * lgamma(b1) -
+        (N - m) * lgamma(nnew1 + b1) - (N - m) * lgamma(a1 + b1) + (N - m) * lgamma(nnew1 + a1 + b1) + (N - m) * lgamma(b1)
       return(ans1)
     }
     gp1new <- function(y)
     {
       a1 = y[1]
       b1 = y[2]
-      da1 = -sum(digamma(t+a1))- m * digamma(a1 + b1)+ m*digamma(nnew1+a1+b1)+ m * digamma(a1)-
-        (N-m)*digamma(nnew1+a1+b1)
-      db1 = -sum(digamma(nnew1-t+ b1)) - m* digamma(a1+b1) + m * digamma(a1 + nnew1 + b1) + m * digamma(b1)+
-        (N-m)*(-digamma(nnew1+b1)-digamma(nnew1+a1+b1)+digamma(nnew1+b1)+digamma(b1))
+      da1 = -sum(digamma(t + a1)) - m * digamma(a1 + b1) + m * digamma(nnew1 + a1 + b1) + m * digamma(a1) -
+        (N - m) * digamma(a1 + b1) + (N - m) * digamma(nnew1 + a1 + b1)
+      db1 = -sum(digamma(nnew1 - t + b1)) - m* digamma(a1 + b1) + m * digamma(a1 + nnew1 + b1) + m * digamma(b1) +
+        (N - m) * digamma(nnew1 + a1 + b1) + (N - m) * digamma(b1) - (N - m) * digamma(a1 + b1) - (N - m) * digamma(nnew1 + b1)
       return(c(da1, db1))
     }
     estimate1new = stats::optim(par = c(alpha1, alpha2), fn = neg.log.lik1new,
@@ -1179,31 +1176,31 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       mle = matrix(c(nnew, ansnew[1], ansnew[2], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (!is.na(p0) && (m/N) <= (1-p0) && type=="zi")
+    } else if (!is.na(p0) && (m/N) <= (1-p0) && type == "zi")
     {
       phi=1-m/N/(1-p0)
       lik = -fvalue + (N - m) * log(1 - m/N) + m * log(m/N)
       mle = matrix(c(nnew, ansnew[1], ansnew[2], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    }else if (!is.na(p0) && (m/N) > (1-p0) && type=="zi")
+    }else if (!is.na(p0) && (m/N) > (1-p0) && type == "zi")
     {
-      psi=min(m/N,(1-p1))
-      phi=1- psi/(1-p1)
-      lik=-fvalue1+(N-m)*log(1-psi)+m*log(psi)
+      psi = min(m/N,(1 - p1))
+      phi = 1 - psi/(1 - p1)
+      lik = -fvalue1 + (N - m) * log(1 - psi) + m * log(psi)
       mle = matrix(c(nnew1, ansnew1[1], ansnew1[2], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (type!="zi" && type!="h")
+    } else if (type != "zi" && type != "h")
     {
       warning("cannot obtain mle with the current model type, the output estimate is derived from general beta binomial 1 distribution.")
-      ans = new.mle(x, n=n, alpha1=alpha1, alpha2=alpha2, lowerbound, upperbound,dist="bb1")
+      ans = new.mle(x, n = n, alpha1 = alpha1, alpha2 = alpha2, lowerbound, upperbound, dist = "bb1")
       mle = matrix(c(ans[1], ans[2], ans[3], 0, ans[4]), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
     }
   }
-  if (dist=="bnb.zihmle")
+  if (dist == "bnb.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -1228,11 +1225,11 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       logA = lgamma(a1 + r1 + b1) + lgamma(a1)
       logB = lgamma(a1 + r1) + lgamma(a1 + b1)
       dr = -m * exp(logB - logA) * (digamma(a1 + r1) - digamma(a1 + r1 + b1))/(1 - exp(logB - logA)) -
-        sum(digamma(r1 + t)) - m * digamma(a1 + r1) + m * digamma(r1)+sum(digamma(a1 + r1 + b1 + t))
-      da = -m * exp(logB - logA) * (digamma(a1 + r1) + digamma(a1 + b1) - digamma(a1 + r1 + b1)-digamma(a1))/(1 - exp(logB -logA))+
-        m * digamma(a1)-m * digamma(a1 + r1)-m * digamma(a1 + b1) + sum(digamma(a1 + r1 + b1 + t))
+        sum(digamma(r1 + t)) - m * digamma(a1 + r1) + m * digamma(r1) + sum(digamma(a1 + r1 + b1 + t))
+      da = -m * exp(logB - logA) * (digamma(a1 + r1) + digamma(a1 + b1) - digamma(a1 + r1 + b1)-digamma(a1))/(1 - exp(logB -logA)) +
+        m * digamma(a1) - m * digamma(a1 + r1) - m * digamma(a1 + b1) + sum(digamma(a1 + r1 + b1 + t))
       db = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + r1 + b1))/(1 - exp(logB - logA))-
-        sum(digamma(t + b1)) - m * digamma(a1 + b1) + sum(digamma(a1 + r1 +t+ b1))+m * digamma(b1)
+        sum(digamma(t + b1)) - m * digamma(a1 + b1) + sum(digamma(a1 + r1 +t+ b1)) + m * digamma(b1)
       return(c(dr, da, db))
     }
     estimate = stats::optim(par = c(r, alpha1, alpha2), fn = neg.log.lik,
@@ -1240,14 +1237,17 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
                                                                     lowerbound), upper = c(upperbound, upperbound, upperbound))
     ans = estimate$par
     fvalue = estimate$value
-    p0 = exp(base::lbeta(ans[1] + ans[2], ans[3])-(base::lbeta(ans[2], ans[3])))
+    p0 = exp(base::lbeta(ans[1] + ans[2], ans[3]) - (base::lbeta(ans[2], ans[3])))
     neg.log.lik1 <- function(y)
     {
       r1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      ans1 = -sum(lgamma(r1+t)) - sum(lgamma(t+b1)) + m*lgamma(r1) + sum(lgamma(t+1)) + m*lgamma(b1) +
-        sum(lgamma(r1+a1+b1+t)) - N*lgamma(r1 + a1) - N*lgamma(a1+b1) + N*lgamma(r1+a1+b1) + N*lgamma(a1) - m*lgamma(r1+a1+b1)
+      logA = lgamma(a1 + r1 + b1) + lgamma(a1)
+      logB = lgamma(a1 + r1) + lgamma(a1 + b1)
+      ans1 = m * log(1 - exp(logB - logA)) + m * lgamma(a1) -
+        m * lgamma(a1 + r1) - sum(lgamma(r1 + t)) - sum(lgamma(t + b1 )) -
+        m * lgamma(a1 + b1) + sum(lgamma(t + 1)) + m * lgamma(r1) + sum(lgamma(a1 + r1 + b1 + t)) + m *lgamma(b1)
       return(ans1)
     }
     gp1 <- function(y)
@@ -1255,19 +1255,19 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       r1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      dr1 = -sum(digamma(r1+t)) + m * digamma(r1) + sum(digamma(r1+a1+b1+t)) -
-        N*(digamma(r1+a1) + N*digamma(r1+a1+b1)) - m*digamma(r1+a1+r1)
-      da1 = sum(digamma(r1+a1+b1+t)) - N*digamma(r1+a1) - N*digamma(a1+b1) +
-        N * digamma(r1+a1+b1) + N*digamma(a1)-m*digamma(r1+a1+b1)
-      db1 = -sum(digamma(t+b1)) + m*digamma(b1) + sum(digamma(r1+a1+b1+t)) -
-        N*digamma(a1+b1) + N*digamma(r1+a1+b1) - m*digamma(r1+a1+b1)
+      dr1 = - sum(digamma(r1 + t)) + m * digamma(r1) + sum(digamma(r1 + a1 + b1 + t)) -
+        N * (digamma(r1 + a1) + (N-m) * digamma(r1 + a1 + b1))
+      da1 = sum(digamma(r1 + a1 + b1 + t)) - N * digamma(r1 + a1) - N * digamma(a1 + b1) +
+        (N - m) * digamma(r1 + a1 + b1) + N * digamma(a1)
+      db1 = -sum(digamma(t + b1)) + m * digamma(b1) + sum(digamma(r1 + a1 + b1 + t)) -
+        N * digamma(a1 + b1) + (N - m) * digamma(r1 + a1 + b1)
       return(c(dr1, da1, db1))
     }
     estimate1 = stats::optim(par = c(r, alpha1, alpha2), fn = neg.log.lik1,
                              gr = gp1, method = "L-BFGS-B", lower = c(lowerbound,lowerbound, lowerbound), upper = c(upperbound, upperbound, upperbound))
     ans1 = estimate1$par
     fvalue1 = estimate1$value
-    p1 = exp(base::lbeta(ans1[1]+ans1[2],ans1[3])-base::lbeta(ans1[2], ans1[3]))
+    p1 = exp(base::lbeta(ans1[1] + ans1[2], ans1[3]) - base::lbeta(ans1[2], ans1[3]))
     #estimation part
     if (!is.na(p0) && type == "h")
     {
@@ -1276,30 +1276,30 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       mle = matrix(c(ans[1], ans[2], ans[3], phi, lik), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (!is.na(p0) && (m/N) <= (1-p0) && type=="zi")
+    } else if (!is.na(p0) && (m/N) <= (1 - p0) && type == "zi")
     {
-      phi = 1 - m/N/(1-p0)
+      phi = 1 - m/N/(1 - p0)
       lik = -fvalue + (N - m) * log(1 - m/N) + m * log(m/N)
       mle = matrix(c(ans[1], ans[2], ans[3], phi, lik), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (!is.na(p0) && (m/N) > (1-p0) && type=="zi")
+    } else if (!is.na(p0) && (m/N) > (1 - p0) && type == "zi")
     {
-      psi=min(m/N,1-p1)
-      phi=1 - psi/(1-p1)
-      lik=-fvalue1+(N-m)*log(1-psi)+m*log(psi)
+      psi = min(m/N , 1 - p1)
+      phi = 1 - psi/(1 - p1)
+      lik = -fvalue1 + (N - m) * log(1 - psi) + m * log(psi)
       mle = matrix(c(ans1[1], ans1[2], ans1[3], phi, lik), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (type!="zi" && type!="h"){
+    } else if (type != "zi" && type != "h"){
       warning("cannot obtain mle with the current model type, the output estimate is derived from general beta negative binomial distribution.")
-      ans = new.mle(x, r=r, alpha1=alpha1, alpha2=alpha2, lowerbound, upperbound,dist="bnb")
+      ans = new.mle(x, r = r, alpha1 = alpha1, alpha2 = alpha2, lowerbound, upperbound, dist = "bnb")
       mle = matrix(c(ans[1], ans[2], ans[3], 0, ans[4]), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
     }
   }
-  if (dist=="bnb1.zihmle")
+  if (dist == "bnb1.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -1313,7 +1313,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       logB = lgamma(a1 + r1) + lgamma(a1 + b1)
       ans = m * log(1 - exp(logB - logA)) + m * lgamma(a1) -
         m * lgamma(a1 + r1) - sum(lgamma(r1 + t)) - sum(lgamma(t + b1 )) -
-        m * lgamma(a1 + b1) + sum(lgamma(t + 1))+ m * lgamma(r1) + sum(lgamma(a1 + r1 + b1 + t)) + m *lgamma(b1)
+        m * lgamma(a1 + b1) + sum(lgamma(t + 1)) + m * lgamma(r1) + sum(lgamma(a1 + r1 + b1 + t)) + m * lgamma(b1)
       return(ans)
     }
     gp <- function(y)
@@ -1324,11 +1324,11 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       logA = lgamma(a1 + r1 + b1) + lgamma(a1)
       logB = lgamma(a1 + r1) + lgamma(a1 + b1)
       dr = -m * exp(logB - logA) * (digamma(a1 + r1) - digamma(a1 + r1 + b1))/(1 - exp(logB - logA)) -
-        sum(digamma(r1 + t)) - m * digamma(a1 + r1) + m * digamma(r1)+sum(digamma(a1 + r1 + b1 + t))
-      da = -m * exp(logB - logA) * (digamma(a1 + r1) + digamma(a1 + b1) - digamma(a1 + r1 + b1)-digamma(a1))/(1 - exp(logB -logA))+
-        m * digamma(a1)-m * digamma(a1 + r1)-m * digamma(a1 + b1) + sum(digamma(a1 + r1 + b1 + t))
-      db = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + r1 + b1))/(1 - exp(logB - logA))-
-        sum(digamma(t + b1)) - m * digamma(a1 + b1) + sum(digamma(a1 + r1 +t+ b1))+m * digamma(b1)
+        sum(digamma(r1 + t)) - m * digamma(a1 + r1) + m * digamma(r1) + sum(digamma(a1 + r1 + b1 + t))
+      da = -m * exp(logB - logA) * (digamma(a1 + r1) + digamma(a1 + b1) - digamma(a1 + r1 + b1) - digamma(a1))/(1 - exp(logB - logA)) +
+        m * digamma(a1) - m * digamma(a1 + r1) - m * digamma(a1 + b1) + sum(digamma(a1 + r1 + b1 + t))
+      db = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + r1 + b1))/(1 - exp(logB - logA)) -
+        sum(digamma(t + b1)) - m * digamma(a1 + b1) + sum(digamma(a1 + r1 +t+ b1)) + m * digamma(b1)
       return(c(dr, da, db))
     }
     estimate = stats::optim(par = c(r, alpha1, alpha2), fn = neg.log.lik,
@@ -1343,7 +1343,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       logA = lgamma(a1 + rnew + b1) + lgamma(a1)
       logB = lgamma(a1 + rnew) + lgamma(a1 + b1)
       ans = m * log(1 - exp(logB - logA)) + m * lgamma(a1) - m * lgamma(a1 + rnew) - sum(lgamma(rnew + t)) - sum(lgamma(t + b1 )) -
-        m * lgamma(a1 + b1) + sum(lgamma(t + 1))+ m * lgamma(rnew) + sum(lgamma(a1 + rnew + b1 + t)) + m *lgamma(b1)
+        m * lgamma(a1 + b1) + sum(lgamma(t + 1)) + m * lgamma(rnew) + sum(lgamma(a1 + rnew + b1 + t)) + m *lgamma(b1)
       return(ans)
     }
     gpnew <- function(y)
@@ -1352,24 +1352,29 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       b1 = y[2]
       logA = lgamma(a1 + rnew + b1) + lgamma(a1)
       logB = lgamma(a1 + rnew) + lgamma(a1 + b1)
-      da = -m * exp(logB - logA) * (digamma(a1 + rnew) + digamma(a1 + b1) - digamma(a1 + rnew + b1)-digamma(a1))/(1 - exp(logB -logA))+
-        m * digamma(a1)-m * digamma(a1 + rnew)-m * digamma(a1 + b1) + sum(digamma(a1 + rnew + b1 + t))
-      db = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + rnew + b1))/(1 - exp(logB - logA))-
-        sum(digamma(t + b1)) - m * digamma(a1 + b1) + sum(digamma(a1 + rnew +t+ b1))+m * digamma(b1)
+      da = -m * exp(logB - logA) * (digamma(a1 + rnew) + digamma(a1 + b1) - digamma(a1 + rnew + b1) - digamma(a1))/(1 - exp(logB - logA)) +
+        m * digamma(a1) - m * digamma(a1 + rnew) - m * digamma(a1 + b1) + sum(digamma(a1 + rnew + b1 + t))
+      db = -m * exp(logB - logA) * (digamma(a1 + b1) - digamma(a1 + rnew + b1))/(1 - exp(logB - logA)) -
+        sum(digamma(t + b1)) - m * digamma(a1 + b1) + sum(digamma(a1 + rnew + t + b1)) + m * digamma(b1)
       return(c(da, db))
     }
-    estimatenew = stats::optim(par = c(alpha1, alpha2), fn = neg.log.liknew, gr = gpnew, method = "L-BFGS-B", lower = c(lowerbound,lowerbound), upper = c(upperbound, upperbound))
+    estimatenew = stats::optim(par = c(alpha1, alpha2), fn = neg.log.liknew, gr = gpnew, method = "L-BFGS-B", lower = c(lowerbound, lowerbound), upper = c(upperbound, upperbound))
     ansnew = estimatenew$par
     fvalue = estimatenew$value
-    p0 = exp(base::lbeta(rnew + ansnew[1], ansnew[2])-(base::lbeta(ansnew[1], ansnew[2])))
+    p0 = exp(base::lbeta(rnew + ansnew[1], ansnew[2]) - (base::lbeta(ansnew[1], ansnew[2])))
     neg.log.lik1 <- function(y)
     {
       r1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      ans1 = -sum(lgamma(r1+t)) - sum(lgamma(t+b1)) + m*lgamma(r1) + sum(lgamma(t+1)) + m*lgamma(b1) +
-        sum(lgamma(r1+a1+b1+t)) - N*lgamma(r1 + a1) - N*lgamma(a1+b1) + N*lgamma(r1+a1+b1) +
-        N*lgamma(a1) - m*lgamma(r1+a1+b1)
+      # logA = lgamma(a1 + r1 + b1) + lgamma(a1)
+      # logB = lgamma(a1 + r1) + lgamma(a1 + b1)
+      # ans1 = m * log(1 - exp(logB - logA)) + m * lgamma(a1) -
+      #   m * lgamma(a1 + r1) - sum(lgamma(r1 + t)) - sum(lgamma(t + b1 )) -
+      #   m * lgamma(a1 + b1) + sum(lgamma(t + 1)) + m * lgamma(r1) + sum(lgamma(a1 + r1 + b1 + t)) + m * lgamma(b1)
+      ans1 = -sum(lgamma(r1 + t)) - sum(lgamma(t + b1)) + m * lgamma(r1) + sum(lgamma(t + 1)) + m * lgamma(b1) +
+        sum(lgamma(r1 + a1 + b1 + t)) - N * lgamma(r1 + a1) - N * lgamma(a1 + b1) + N * lgamma(r1 + a1 + b1) +
+        N * lgamma(a1) - m * lgamma(r1 + a1 + b1)
       return(ans1)
     }
     gp1 <- function(y)
@@ -1377,12 +1382,12 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       r1 = y[1]
       a1 = y[2]
       b1 = y[3]
-      dr1 = -sum(digamma(r1+t)) + m * digamma(r1) + sum(digamma(r1+a1+b1+t)) -
-        N*(digamma(r1+a1) + N*digamma(r1+a1+b1)) - m*digamma(r1+a1+r1)
-      da1 = sum(digamma(r1+a1+b1+t)) - N*digamma(r1+a1) - N*digamma(a1+b1) +
-        N * digamma(r1+a1+b1) + N*digamma(a1)-m*digamma(r1+a1+b1)
-      db1 = -sum(digamma(t+b1)) + m*digamma(b1) + sum(digamma(r1+a1+b1+t)) -
-        N*digamma(a1+b1) + N*digamma(r1+a1+b1) - m*digamma(r1+a1+b1)
+      dr1 = - sum(digamma(r1 + t)) + m * digamma(r1) + sum(digamma(r1 + a1 + b1 + t)) -
+        N * (digamma(r1 + a1) + (N-m) * digamma(r1 + a1 + b1))
+      da1 = sum(digamma(r1 + a1 + b1 + t)) - N * digamma(r1 + a1) - N * digamma(a1 + b1) +
+        (N - m) * digamma(r1 + a1 + b1) + N * digamma(a1)
+      db1 = -sum(digamma(t + b1)) + m * digamma(b1) + sum(digamma(r1 + a1 + b1 + t)) -
+        N * digamma(a1 + b1) + (N - m) * digamma(r1 + a1 + b1)
       return(c(dr1, da1, db1))
     }
     estimate1 = stats::optim(par = c(r, alpha1, alpha2), fn = neg.log.lik1,
@@ -1393,25 +1398,30 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
     {
       a1 = y[1]
       b1 = y[2]
-      ans1 = -sum(lgamma(rnew1+t)) - sum(lgamma(t+b1)) + m*lgamma(rnew1) + sum(lgamma(t+1)) + m*lgamma(b1) +
-        sum(lgamma(rnew1+a1+b1+t)) - N*lgamma(rnew1 + a1) - N*lgamma(a1+b1) + N*lgamma(rnew1+a1+b1) +
-        N*lgamma(a1) - m*lgamma(rnew1+a1+b1)
+      # logA = lgamma(a1 + rnew1 + b1) + lgamma(a1)
+      # logB = lgamma(a1 + rnew1) + lgamma(a1 + b1)
+      # ans1 = m * log(1 - exp(logB - logA)) + m * lgamma(a1) -
+      #   m * lgamma(a1 + rnew1) - sum(lgamma(rnew1 + t)) - sum(lgamma(t + b1 )) -
+      #   m * lgamma(a1 + b1) + sum(lgamma(t + 1)) + m * lgamma(rnew1) + sum(lgamma(a1 + rnew1 + b1 + t)) + m *lgamma(b1)
+      ans1 = -sum(lgamma(rnew1 + t)) - sum(lgamma(t + b1)) + m * lgamma(rnew1) + sum(lgamma(t + 1)) + m * lgamma(b1) +
+        sum(lgamma(rnew1 + a1 + b1 + t)) - N * lgamma(rnew1 + a1) - N * lgamma(a1 + b1) + N * lgamma(rnew1 + a1 + b1) +
+        N * lgamma(a1) - m * lgamma(rnew1 + a1 + b1)
       return(ans1)
     }
     gp1new <- function(y)
     {
       a1 = y[1]
       b1 = y[2]
-      da1 = sum(digamma(rnew1+a1+b1+t)) - N*digamma(rnew1+a1) - N*digamma(a1+b1) +
-        N * digamma(rnew1+a1+b1) + N*digamma(a1)-m*digamma(rnew1+a1+b1)
-      db1 = -sum(digamma(t+b1)) + m*digamma(b1) + sum(digamma(rnew1+a1+b1+t)) -
-        N*digamma(a1+b1) + N*digamma(rnew1+a1+b1) - m*digamma(rnew1+a1+b1)
+      da1 = sum(digamma(rnew1 + a1 + b1 + t)) - N * digamma(rnew1 + a1) - N * digamma(a1 + b1) +
+        N * digamma(rnew1 + a1 + b1) + N * digamma(a1) - m * digamma(rnew1 + a1 + b1)
+      db1 = -sum(digamma(t + b1)) + m * digamma(b1) + sum(digamma(rnew1 + a1 + b1 + t)) -
+        N * digamma(a1 + b1) + N * digamma(rnew1 + a1 + b1) - m * digamma(rnew1 + a1 + b1)
       return(c(da1, db1))
     }
     estimate1new = stats::optim(par = c(alpha1, alpha2), fn = neg.log.lik1new, gr = gp1new, method = "L-BFGS-B", lower = c(lowerbound, lowerbound), upper = c(upperbound, upperbound))
     ansnew1 = estimate1new$par
     fvalue1 = estimate1new$value
-    p1 = exp(base::lbeta(rnew1+ansnew1[1],ansnew1[2])-base::lbeta(ansnew1[1], ansnew1[2]))
+    p1 = exp(base::lbeta(rnew1 + ansnew1[1], ansnew1[2]) - base::lbeta(ansnew1[1], ansnew1[2]))
     #estimation part
     if (!is.na(p0) && type == "h")
     {
@@ -1420,31 +1430,31 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       mle = matrix(c(rnew, ansnew[1], ansnew[2], phi, lik), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (!is.na(p0) && (m/N) <= (1-p0) && type=="zi")
+    } else if (!is.na(p0) && (m/N) <= (1 - p0) && type == "zi")
     {
-      phi = 1 - m/N/(1-p0)
+      phi = 1 - m/N/(1 - p0)
       lik = -fvalue + (N - m) * log(1 - m/N) + m * log(m/N)
       mle = matrix(c(rnew, ansnew[1], ansnew[2], phi, lik), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (!is.na(p0) && (m/N) > (1-p0) && type=="zi")
+    } else if (!is.na(p0) && (m/N) > (1 - p0) && type == "zi")
     {
-      psi=min(m/N,1-p1)
-      phi=1 - psi/(1-p1)
-      lik=-fvalue1+(N-m)*log(1-psi)+m*log(psi)
+      psi = min(m/N , 1 - p1)
+      phi = 1 - psi/(1 - p1)
+      lik = -fvalue1 + (N - m) * log(1 - psi) + m * log(psi)
       mle = matrix(c(rnew1, ansnew1[1], ansnew1[2], phi, lik), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (type!="zi" && type!="h")
+    } else if (type != "zi" && type != "h")
     {
       warning("cannot obtain mle with the current model type, the output estimate is derived from general beta negative binomial 1 distribution.")
-      ans = new.mle(x, r=r, alpha1=alpha1, alpha2=alpha2, lowerbound, upperbound,dist="bnb1")
+      ans = new.mle(x, r = r, alpha1 = alpha1, alpha2 = alpha2, lowerbound, upperbound,dist = "bnb1")
       mle = matrix(c(ans[1], ans[2], ans[3], 0, ans[4]), nrow = 1)
       colnames(mle) = c("r", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
     }
   }
-  if (dist=="normal.zihmle")
+  if (dist == "normal.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -1483,7 +1493,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     }
   }
-  if (dist=="lognorm.zihmle")
+  if (dist == "lognorm.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -1522,7 +1532,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     }
   }
-  if (dist=="halfnorm.zihmle")
+  if (dist == "halfnorm.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -1557,7 +1567,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     }
   }
-  if (dist=="exp.zihmle")
+  if (dist == "exp.zihmle")
   {
     N = length(x)
     t = x[x > 0]
@@ -1779,7 +1789,7 @@ sample.h1<-function (N, phi, dist = "poisson", lambda = NA, r = NA, p = NA, alph
   phi = phi[1]
   if (N <= 0)
     stop("the sample size N is too small.")
-  if ((phi >= 1) | (phi <= 0))
+  if ((phi >= 1) | (phi < 0))
     stop("phi is not between 0 and 1 (not including 0 and 1).")
   if (!(dist %in% c("poisson", "geometric","nb", "bb", "bnb","normal","halfnormal","lognormal","exponential")))
     stop("please input a distribution name among poisson,geometric,nb,bb,bnb,normal,lognormal,halfnormal,exponential.")
@@ -1954,7 +1964,7 @@ sample.h1<-function (N, phi, dist = "poisson", lambda = NA, r = NA, p = NA, alph
 #' \item sigma: initial value of sigma used in computation.
 #' }
 #'
-#' @seealso \link[AZIAD]{kstest.B},\link[AZIAD]{lrt.A}
+#' @seealso \link[AZIAD]{lrt.A}
 #'
 #' @references \itemize{\item H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data, accepted for publication in 2019 IEEE EMBS International Conference on Biomedical & Health Informatics (BHI).}
 #' @export
@@ -2233,7 +2243,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD','rootSolve')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages='AZIAD') %do%
         zih.mle(sample(x, size=N, replace=T),lambda=lambda,type='zi',lowerbound,upperbound,dist="poisson.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -2245,14 +2255,14 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
   }
   if(dist=='zigeom')
   {
-    mle_ori=zih.mle(x,type='zi',p=p,lowerbound,upperbound,dist="geometric.zihmle")
+    mle_ori=zih.mle(x, p=p, type='zi',lowerbound,upperbound,dist="geometric.zihmle")
     probs_ori=mle_ori[2]+(1-mle_ori[2])*stats::pgeom(0:max(x),prob=mle_ori[1])
     step_ori=stats::stepfun(0:max(x),c(0,probs_ori))
     z=stats::knots(step_ori)
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages='AZIAD') %do%
         zih.mle(sample(x, size=N, replace=T),p=p,type='zi',lowerbound,upperbound,dist="geometric.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -2405,7 +2415,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD','rootSolve')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages='AZIAD') %do%
         zih.mle(sample(x, size=N, replace=T),lambda=lambda,type='h',lowerbound,upperbound,dist="poisson.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -2425,7 +2435,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD','rootSolve')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages='AZIAD') %do%
         zih.mle(sample(x, size=N, replace=T),p=p,type='h',lowerbound,upperbound,dist="geometric.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -2465,22 +2475,14 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new<-NULL;
-      xb <- list()
-      for(i in 1:nsim)
-      {
-        xb[[i]] <- sample(x,length(x),replace = TRUE)
-        temp<-zih.mle(xb[[i]],n=mle_ori[1],alpha1=mle_ori[2],alpha2=mle_ori[3],type = "h",lowerbound, upperbound,dist ="bb1.zihmle")
-        mle_new<-rbind(mle_new,temp)
-      }
-      mle_new<-t(mle_new)
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages='AZIAD') %do%
+        zih.mle(sample(x, size=N, replace=T),n=mle_ori[1],alpha1=mle_ori[2],alpha2=mle_ori[3],type='h',lowerbound,upperbound,dist="bb1.zihmle")
+      mle_new=t(mle_new)
     }else{
-      mle_new = matrix(rep(mle_ori, nsim), ncol = nsim)
+      mle_new=matrix(rep(mle_ori,nsim),ncol=nsim)
     }
-    D2<-NULL;
-    for (i in 1:nsim){
-      temp2<- general.ks(N, n = mle_new[1, i], alpha1 = mle_new[2, i],alpha2=mle_new[3,i],dist = "bb", type = "h", phi = mle_new[4,i])
-      D2<-rbind(D2,temp2)}
+    D2=foreach::foreach(j=1:nsim,.combine=c,.packages=c('extraDistr','AZIAD')) %do%
+      general.ks(N,n=mle_new[1,j],alpha1=mle_new[2,j],alpha2=mle_new[3,j],dist="bb",type="h",phi=mle_new[4,j])
     temp=list(r=NULL, p=NULL, alpha1=alpha1, alpha2=alpha2, n=n, lambda=NULL, mean=NULL, sigma=NULL)
   }
   if(dist=='bnbh')
@@ -2649,7 +2651,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
 #' \item sigma: initial value of sigma used in computation.
 #' }
 #' @references \itemize{\item H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data, accepted for publication in 2019 IEEE EMBS International Conference on Biomedical & Health Informatics (BHI).}
-#' @seealso \link[AZIAD]{kstest.A},\link[AZIAD]{lrt.B}
+#' @seealso \link[AZIAD]{kstest.A}
 #' @export
 #'
 #' @examples
@@ -3818,14 +3820,13 @@ general.ks<-function(N,lambda,r,p,n,alpha1,alpha2,mean,sigma,dist,type=c('genera
 #' Otherwise, There is no significant difference between dist of d1 and dist of d2, given the current data.
 #' @return The p-value of the likelihood ratio test.
 #'
-#' @seealso \link[AZIAD]{lrt.B}
 #' @export
 #' @examples
 #' set.seed(1005)
 #' x=sample.h1(2000,phi=0.3,dist='poisson',lambda=10)
 #' d1=kstest.A(x,nsim=100,bootstrap = TRUE,dist= 'ph',lowerbound = 1e-10, upperbound = 100000)
 #' d2=kstest.A(x,nsim=100,bootstrap = TRUE,dist= 'geomh',lowerbound = 1e-10, upperbound = 100000)
-#' lrt.A(d1,d2) #0.28
+#' lrt.A(d1,d2, parallel = FALSE) #0.28
 lrt.A<-function (d1, d2, parallel = FALSE)
 {
   `%do%` <- foreach::`%do%`
@@ -3955,157 +3956,6 @@ lrt.A<-function (d1, d2, parallel = FALSE)
   return(pvalue)
 }
 
-#' likelihood ratio test for two models based on kstest.B
-#' @description Conduct likelihood ratio test for comparing two different models.
-#' @usage lrt.B(d1, d2, parallel = FALSE)
-#' @param d1 	An object of class 'kstest.B'.
-#' @param d2  An object of class 'kstest.B'.
-#' @param parallel Whether to use multiple threads to paralleling computation. Default is FALSE. Please aware that it may take longer time to execute the program with parallel=FALSE.
-#'
-#' @details If the pvalue of d1 and d2 are greater than the user-specified significance level, which indicates that the original data x may come from the two distributions in d1 and d2, a likelihood ratio test is desired to choose a more 'possible' distribution based on the current data.
-#' NOTE that the x in d1 and d2 must be IDENTICAL! Besides, NOTE that the dist in d1 and d2 must be DIFFERENT!
-#' The dist inherited from d1 is the null distribution and that from d2 is used as the alternative distribution.
-#'
-#' If the output p-value smaller than the user-specified significance level, the dist of d2 is more appropriate for modeling x.
-#' Otherwise, There is no significant difference between dist of d1 and dist of d2, given the current data.
-#' @return The p-value of the likelihood ratio test.
-#'
-#' @seealso \link[AZIAD]{lrt.A}
-#' @export
-#' @examples
-#' set.seed(234)
-#' x=sample.zi1(2000,phi=0.3,dist='bb',n=10,alpha1=2,alpha2=4)
-#' \donttest{d1=kstest.B(x,nsim=100,bootstrap=TRUE,dist='zibb',lowerbound=1e-10,upperbound =100000)}
-#' \donttest{d2=kstest.B(x,nsim=100,bootstrap=TRUE,dist='zibnb',lowerbound=1e-10,upperbound=100000)}
-#' \donttest{lrt.B(d1,d2)} #0.58
-lrt.B<-function (d1, d2, parallel = FALSE)
-{
-  `%do%` <- foreach::`%do%`
-  if (!(methods::is(d1, "kstest.B") & methods::is(d2, "kstest.B")))
-    stop("d1, d2 must be objects from class kstest.B")
-  if (sum((d1$x - d2$x) == 0) < length(d1$x))
-    stop("d1$x must be identical to d2$x.")
-  lik1_ori = d1$mle_ori
-  length1 = length(lik1_ori)
-  lik2_ori = d2$mle_ori
-  length2 = length(lik2_ori)
-  t_ori = lik2_ori[length2] - lik1_ori[length1]
-  mle_new = d1$mle_new
-  dist1 = d1$dist
-  N = d1$N
-  lambda1 = d1$lambda
-  r1 = d1$r
-  p1 = d1$p
-  alpha11 = d1$alpha1
-  alpha12 = d1$alpha2
-  n1 = d1$n
-  mean1 = d1$mean
-  sigma1 = d1$sigma
-  phi1 = d1$phi
-  nsim = d1$nsim
-  lowerbound1 = d1$lowerbound
-  upperbound1 = d1$upperbound
-  dist2 = d2$dist
-  lambda2 = d2$lambda
-  r2 = d2$r
-  p2 = d2$p
-  alpha21 = d2$alpha1
-  alpha22 = d2$alpha2
-  n2 = d2$n
-  mean2 = d2$mean
-  sigma2 = d2$sigma
-  phi2 = d2$phi
-  lowerbound2 = d2$lowerbound
-  upperbound2 = d2$upperbound
-  f1 <- function(dist, para)
-  {
-    temp1 = switch(dist,
-                   poisson = stats::rpois(N, lambda = para[1]),
-                   geometric=stats::rgeom(N, prob=para[1]),
-                   nb = stats::rnbinom(N, size = ceiling(para[1]), prob = para[2]),
-                   nb1 = stats::rnbinom(N, size = ceiling(para[1]), prob = para[2]),
-                   bb = extraDistr::rbbinom(N, size = ceiling(para[1]), alpha = para[2], beta = para[3]),
-                   bb1 = extraDistr::rbbinom(N, size = ceiling(para[1]), alpha = para[2], beta = para[3]),
-                   bnb = extraDistr::rbnbinom(N, size = ceiling(para[1]), alpha = para[2], beta = para[3]),
-                   bnb1 = extraDistr::rbnbinom(N, size = ceiling(para[1]), alpha = para[2], beta = para[3]),
-                   normal = stats::rnorm(N, mean=para[1], sd=para[2]),
-                   lognormal = stats::rlnorm(N, meanlog = para[1], sdlog = para[2]),
-                   halfnormal = extraDistr::rhnorm(N, sigma = para[1]),
-                   exponential = stats::rexp(N,rate=para[1]),
-                   zip = sample.zi1(N, phi = para[2], lambda = para[1],dist ="poisson"),
-                   zigeom = sample.zi1(N, phi = para[2], p=para[1], dist="geometric"),
-                   zinb = sample.zi1(N, phi=para[3], dist = "nb", r = para[1], p = para[2]),
-                   zibb = sample.zi1(N, phi=para[4], dist = "bb", alpha1 = para[2], alpha2 = para[3], n = para[1]),
-                   zibnb = sample.zi1(N, phi=para[4], dist = "bnb", r = para[1], alpha1 = para[2],  alpha2 = para[3]),
-                   zinormal = sample.zi1(N, phi=para[3], dist="normal", mean=para[1], sigma=para[2]),
-                   zilognorm = sample.zi1(N, phi=para[3], dist="lognormal", mean=para[1], sigma=para[2]),
-                   zihalfnorm = sample.zi1(N, phi=para[2], dist="halfnormal", sigma=para[1]),
-                   ziexp = sample.zi1(N,phi=para[2],dist="exponential", lambda=para[1]),
-                   ph = sample.h1(N, phi=para[2], lambda = para[1], dist="poisson"),
-                   geomh = sample.h1(N, phi=para[2], p=para[1], dist="geometric"),
-                   nbh = sample.h1(N, phi=para[3], dist = "nb", r = para[1], p = para[2]),
-                   bbh = sample.h1(N, phi=para[4], dist = "bb", alpha1 = para[2], alpha2 = para[3], n = para[1]),
-                   bnbh = sample.h1(N, phi=para[4], dist = "bnb", r = para[1], alpha1 = para[2], alpha2 = para[3]),
-                   normalh = sample.h1(N, phi=para[3], dist="normal", mean=para[1], sigma=para[2]),
-                   lognormh = sample.h1(N, phi=para[3], dist="lognormal", mean=para[1], sigma=para[2]),
-                   halfnormh = sample.h1(N, phi=para[2], dist="halfnormal", sigma=para[1]),
-                   exph = sample.h1(N, phi=para[2], dist="exponential", lambda=para[1]))
-    return(temp1)
-  }
-  f2 <- function(x, dist, lambda, r, p, alpha1, alpha2, n, mean, sigma, phi, lowerbound, upperbound)
-  {
-    temp2 = switch(dist,
-                   poisson = new.mle(x,lambda=lambda, dist="poisson"),
-                   geometric = new.mle(x, p=p, dist="geometric"),
-                   nb = new.mle(x, r=r, p=p, lowerbound, upperbound,dist="nb"),
-                   nb1 = new.mle(x, r=r, p=p, lowerbound, upperbound,dist="nb1"),
-                   bb = new.mle(x, n=n, alpha1=alpha1, alpha2=alpha2, lowerbound, upperbound,dist="bb"),
-                   bb1 = new.mle(x, n=n, alpha1=alpha1, alpha2=alpha2, lowerbound, upperbound,dist="bb1"),
-                   bnb = new.mle(x, r=r, alpha1=alpha1, alpha2=alpha2, lowerbound, upperbound,dist="bnb"),
-                   bnb1 = new.mle(x, r=r, alpha1=alpha1, alpha2=alpha2, lowerbound, upperbound,dist="bnb1"),
-                   normal = new.mle(x, mean=mean, sigma=sigma, lowerbound, upperbound, dist="normal"),
-                   lognormal = new.mle(x, mean = mean, sigma=sigma, lowerbound, upperbound, dist="lognormal"),
-                   halfnormal = new.mle(x, sigma = sigma, lowerbound, upperbound, dist="halfnormal"),
-                   exponential = new.mle(x, lambda=lambda, lowerbound, upperbound, dist="exponential"),
-                   zip = zih.mle(x, lambda=lambda, type = "zi", lowerbound, upperbound, dist="poisson.zihmle"),
-                   zigeom = zih.mle(x,p=p,type="zi",lowerbound, upperbound,dist="geometric.zihmle"),
-                   zinb = zih.mle(x, r=r, p=p, type = "zi", lowerbound, upperbound,dist="nb1.zihmle"),
-                   zibb = zih.mle(x, n=n, alpha1=alpha1, alpha2=alpha2, type = "zi", lowerbound, upperbound,dist="bb1.zihmle"),
-                   zibnb = zih.mle(x, r=r, alpha1=alpha1, alpha2=alpha2, type = "zi", lowerbound, upperbound,dist="bnb1.zihmle"),
-                   zinormal = zih.mle(x, mean=mean, sigma=sigma, lowerbound, upperbound,dist="normal.zihmle", type="zi"),
-                   zilognorm = zih.mle(x, mean=mean, sigma=sigma, lowerbound, upperbound, dist="lognorm.zihmle", type="zi"),
-                   zihalfnorm = zih.mle(x, sigma=sigma, lowerbound, upperbound, dist="halfnorm.zihmle", type="zi"),
-                   ziexp = zih.mle(x, lambda=lambda, lowerbound, upperbound, dist="exp.zihmle", type="zi"),
-                   ph = zih.mle(x, lambda=lambda,type = "h", lowerbound, upperbound,dist="poisson.zihmle"),
-                   geomh=zih.mle(x, p=p, type="h", lowerbound, upperbound, dist="geometric.zihmle"),
-                   nbh = zih.mle(x, r=r, p=p, type = "h", lowerbound, upperbound,dist="nb1.zihmle"),
-                   bbh = zih.mle(x, n=n, alpha1=alpha1, alpha2=alpha2, type = "h", lowerbound, upperbound,dist="bb1.zihmle"),
-                   bnbh = zih.mle(x, r=r, alpha1=alpha1, alpha2=alpha2, type = "h", lowerbound, upperbound,dist="bnb1.zihmle"),
-                   normalh = zih.mle(x, mean=mean, sigma=sigma, lowerbound, upperbound, dist="normal.zihmle", type="h"),
-                   lognormh = zih.mle(x, mean=mean, sigma=sigma, lowerbound, upperbound, dist="lognorm.zihmle", type="h"),
-                   halfnormh = zih.mle(x, sigma=sigma, lowerbound, upperbound, dist="halfnorm.zihmle", type="h"),
-                   exph = zih.mle(x, lambda=lambda, lowerbound, upperbound, dist="exp.zihmle", type="h"))
-    return(temp2)
-  }
-  if (parallel) {
-    cl_cores = parallel::detectCores()
-    cl = parallel::makeCluster(cl_cores - 2)
-  }
-  else {
-    cl = parallel::makeCluster(1)
-  }
-  doParallel::registerDoParallel(cl)
-  j = 0
-  t_new = foreach::foreach(j = 1:nsim, .combine = c,
-                           .packages = c("extraDistr","foreach")) %do% {x = f1(dist1,mle_new[, j])
-                           new1 = f2(x, dist1, lambda1, r1, p1, alpha11, alpha12, n1, mean1, sigma1, phi1, lowerbound1, upperbound1)
-                           new2 = f2(x, dist2, lambda2, r2, p2, alpha21, alpha22, n2, mean2, sigma2, phi2, lowerbound2, upperbound2)
-                           dif = new2[length2] - new1[length1]
-                           }
-  parallel::stopCluster(cl)
-  pvalue = sum(t_new >= t_ori)/nsim
-  return(pvalue)
-}
 
 
 check.input1<-function(x,dist,lowerbound,upperbound)
@@ -4254,7 +4104,7 @@ FI.ZI <- function (x, dist= "poisson",
     phi=0
     p0=p/(1-p)
     cstar=p0/(1-p0)
-    A22 = -(3*p-1)/(p*(1-p))^2
+    A22 = -(1-phi)/(p^2*(1-p))
     inv.fish<-solve(A22)
     crit <- stats::qnorm((1 + 0.95)/2)
     CIp = pest + c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
@@ -4537,7 +4387,7 @@ FI.ZI <- function (x, dist= "poisson",
     A11 = (1-p) /(phi+(1-phi)*p)*(1-phi)
     A12 = 1/(phi+(1-phi)*p)
     A21 = A12
-    A22 = -(1-phi) * (((2*p-1)/(p^2*(1-p))) + (phi/(phi+(1-phi)*p)*p))
+    A22 = 1/(phi+(1-phi)*p) * ((1-phi)*(phi*(1-p)+p*(1-phi)+phi*p^2))/(p^2*(1-p))
     FZIgeom = matrix(c(A11,A12,A21,A22),ncol=2,nrow=2,byrow=TRUE)
 
     if(corpcor::is.positive.definite(FZIgeom, tol=1e-8))
@@ -4589,69 +4439,35 @@ FI.ZI <- function (x, dist= "poisson",
   }
   if (dist=="zibb")
   {
-    mle1<-zih.mle(x,n=n,alpha1=alpha1,alpha2=alpha2,dist="bb.zihmle",type="zi",lowerbound,upperbound)
+    mle<-zih.mle(x,r=r,p=p,dist="nb.zihmle",type="zi",lowerbound,upperbound)
     N = length(x)
-    y<-extraDistr::rbbinom(N, size=n, alpha=alpha1, beta=alpha2)
-    n=mle1[1,1]
-    alpha=mle1[1,2]
-    beta=mle1[1,3]
-    phi=mle1[1,4]
-    nest<-n;alphaest<-alpha;betaest<-beta;phiest<-phi
-    p0 = beta(alpha,n+beta)/beta(alpha,beta)
-    A11 = (1-p0)/(phi+(1-phi) * p0) * (1-phi)
-    A12 = (p0/(phi+(1-phi) * p0)) * (digamma(n+beta) - digamma(n+alpha+beta))
+    y<-stats::rnbinom(N,r,p)
+    r=mle[1,1]
+    p=mle[1,2]
+    phi=mle[1,3]
+    rest<-r;pest<-p;phiest<-phi;
+    p0 = (p)^r
+    A11 = (1-p0)/((phi+(1-phi) * p0) * (1-phi))
+    A12 = (p0/(phi+(1-phi) * p0)) * log(p)
     A21 = A12
-    A13 = (p0/(phi+(1-phi) * p0)) * (digamma(alpha+beta) - digamma(n+alpha+beta))
+    A13 = (p0/(phi+(1-phi) * p0)) * (r/p)
     A31 = A13
-    A14 = (p0/(phi+(1-phi) * p0)) * (digamma(n+beta) + digamma(alpha+beta) - digamma(n+alpha+beta) - digamma(beta))
-    A41=A14
+    Cstar=(phi*p0)/(phi+(1-phi) * p0)
 
-    Cstar = (phi*p0)/(phi+(1-phi) * p0)
-
-    A22 = -(1-phi) * (trigamma(n+1) - trigamma(n+alpha+beta) + mean(trigamma(n-y+beta)) - mean(trigamma(n-y+1))+
-                        Cstar * (digamma(n+beta) - digamma(n+alpha+beta))^2)
-    A23 = -(1-phi) * (-trigamma(n+alpha+beta) +
-                        Cstar * ((digamma(n+beta) - digamma(n+alpha+beta)) * (digamma(alpha+beta) - digamma(n+alpha+beta))))
-    A32 = A23
-    A24 = -(1-phi) * (mean(trigamma(n-y+beta)) - trigamma(n+alpha+beta) +
-                        Cstar * ((digamma(n+beta) - digamma(n+alpha+beta)) * (digamma(n+beta) + digamma(alpha+beta) -
-                                                                                digamma(n+alpha+beta) - digamma(beta))))
-    A42 = A24
-    A33 = -(1-phi) * (trigamma(alpha+beta) - trigamma(n+alpha+beta) - trigamma(alpha) + mean(trigamma(y+alpha)) +
-                        Cstar * (digamma(alpha+beta) - digamma(n+alpha+beta))^2)
-    A34 = -(1-phi) * (trigamma(alpha+beta) - trigamma(n+alpha+beta) +
-                        Cstar * ((digamma(alpha+beta) - digamma(n+alpha+beta))*
-                                   (digamma(n+beta) + digamma(alpha+beta) - digamma(n+alpha+beta) - digamma(beta))))
-    A43 = A34
-    A44 = -(1-phi) * (trigamma(alpha+beta) - trigamma(beta) - trigamma(n+alpha+beta) + mean(trigamma(n-y+beta)) +
-                        Cstar * (digamma(n+beta) + digamma(alpha+beta) - digamma(n+alpha+beta) - digamma(beta))^2)
-
-    FZIBB = matrix(c(A11,A12,A13,A14,A21,A22,A23,A24,A31,A32,A33,
-                     A34,A41,A42,A43,A44),ncol=4,nrow=4,byrow=TRUE)
-    FZIBB33 = matrix(c(A22,A23,A24,A32,A33,A34,A42,A43,A44), ncol=3,nrow=3,byrow =TRUE)
-
-    if(corpcor::is.positive.definite(FZIBB, tol=1e-8))
-    {
-      inv.fish<-solve(FZIBB)
-    }
-    else{
-      a<-QRM::eigenmeth(FZIBB, delta = 0.001)
-      inv.fish<-solve(a)
-    }
-
+    A22 = -(1-phi) * (mean(trigamma(y+r)) - trigamma(r) + Cstar * log(p)^2)
+    A23 = (1-phi) * ((1/p) + Cstar * (r * log(p)/(p)))
+    A32=A23
+    A33=(1-phi) * ((r/(p^2*(1-p))) - Cstar * (r/p)^2)
+    FZINB =  matrix(c(A11,A12,A13,A21,A22,A23,A31,A32,A33),ncol=3,nrow=3,byrow=TRUE)
+    FZINB22= matrix (c(A22,A23,A32,A33), ncol=2,nrow=2,byrow =TRUE)
+    inv.fish<-solve(FZINB)
     crit <- stats::qnorm((1 + 0.95)/2)
-    CIphi = phiest+ c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
-
-    CIn = nest + c(-1, 1) * crit * sqrt(inv.fish[2,2])/sqrt(N)
-
-    CIa = alphaest + c(-1, 1) * crit * sqrt(inv.fish[3,3])/sqrt(N)
-
-    CIb = betaest + c(-1, 1) * crit * sqrt(inv.fish[4,4])/sqrt(N)
-
-
-    ConfInt=matrix(c(CIphi,CIn,CIa,CIb),ncol=2,nrow=4,byrow=TRUE)
-    rownames(ConfInt) = c("CI of phi","CI of n", "CI of alpha" , "CI of beta")
-    return(list(inversefisher=inv.fish,ConfidenceIntervals=ConfInt))
+    CIphi = phiest + c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
+    CIr = rest + c(-1, 1) * crit * sqrt(inv.fish[2,2])/sqrt(N)
+    CIp = pest + c(-1, 1) * crit * sqrt(inv.fish[3,3])/sqrt(N)
+    CIs=matrix(c(CIphi,CIr,CIp),ncol=2,nrow=3,byrow=TRUE)
+    rownames(CIs) = c("CI of phi","CI of r", "CI of p")
+    return(list(inversefisher=inv.fish,ConfidenceIntervals=CIs))
   }
   if (dist=="zibnb")
   {
@@ -4846,7 +4662,7 @@ FI.ZI <- function (x, dist= "poisson",
     A11 = 1 /(phi* (1-phi))
     A12 = 0
     A21 = A12
-    A22 = -(1-phi)/(1-p) * (3*p-1)/(p^2*(1-p))
+    A22 = (1-phi)/((p^2)*(1-p))
     FZIgeom = matrix(c(A11,A12,A21,A22),ncol=2,nrow=2,byrow=TRUE)
 
     if(corpcor::is.positive.definite(FZIgeom, tol=1e-8))
@@ -5027,7 +4843,7 @@ FI.ZI <- function (x, dist= "poisson",
 #' Expenditure Survey (NMES) for 1987/88, the data are available from the data archive of
 #' the Journal of Applied Econometrics at http://www.econ.queensu.ca/jae/1997-v12.3/deb-trivedi/.
 #' In AZIAD package we work with the number of physicians office visits for the patients.Based on
-#' the analysis of kstest.A and kstest.B and lrt.A and lrt.B the data belongs to zero-inflated beta negative binomial
+#' the analysis of kstest.A and kstest.B and lrt.A the data belongs to zero-inflated beta negative binomial
 #' or beta negative binomial hurdle model.
 #'
 #' @source \itemize{\item http://www.jstatsoft.org/v27/i08/paper}

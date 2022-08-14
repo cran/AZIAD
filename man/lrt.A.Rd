@@ -32,8 +32,5 @@ set.seed(1005)
 x=sample.h1(2000,phi=0.3,dist='poisson',lambda=10)
 d1=kstest.A(x,nsim=100,bootstrap = TRUE,dist= 'ph',lowerbound = 1e-10, upperbound = 100000)
 d2=kstest.A(x,nsim=100,bootstrap = TRUE,dist= 'geomh',lowerbound = 1e-10, upperbound = 100000)
-lrt.A(d1,d2) #0.28
-}
-\seealso{
-\link[AZIAD]{lrt.B}
+lrt.A(d1,d2, parallel = FALSE) #0.28
 }

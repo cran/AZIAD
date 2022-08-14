@@ -118,7 +118,7 @@ new.mle(x1,lambda=3,dist="poisson")                         #9.776 -2611.242
 x2=stats::rgeom(1000,prob=0.2)
 new.mle(x2,p=0.5,dist="geometric")                          #0.1963865 -2522.333
 x3=stats::rnbinom(1000,size=5,prob=0.3)
-new.mle(x3,r=2,p=0.6,dist="nb")                             #4.575147 0.281597 -3201.246
+new.mle(x3,r=2,p=0.6,dist="nb")                             #5.113298 0.3004412 -3186.163
 new.mle(x3,r=2,p=0.6,dist="nb1")                            #5 0.299904 -3202.223
 x4=extraDistr::rbbinom(1000,size=4,alpha=2,beta=3)
 new.mle(x4,n=10,alpha1=3,alpha2=4,dist="bb")                #3.99 1.78774 2.680009 -1533.982

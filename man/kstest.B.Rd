@@ -100,5 +100,5 @@ x=sample.zi1(2000,phi=0.3,dist='bnb',r=5,alpha=3,alpha2=3)
 \itemize{\item H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data, accepted for publication in 2019 IEEE EMBS International Conference on Biomedical & Health Informatics (BHI).}
 }
 \seealso{
-\link[AZIAD]{kstest.A},\link[AZIAD]{lrt.B}
+\link[AZIAD]{kstest.A}
 }

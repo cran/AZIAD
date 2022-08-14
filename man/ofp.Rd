@@ -10,7 +10,7 @@ by Medicare, a public insurance program. Originally obtained from the US Nationa
 Expenditure Survey (NMES) for 1987/88, the data are available from the data archive of
 the Journal of Applied Econometrics at http://www.econ.queensu.ca/jae/1997-v12.3/deb-trivedi/.
 In AZIAD package we work with the number of physicians office visits for the patients.Based on
-the analysis of kstest.A and kstest.B and lrt.A and lrt.B the data belongs to zero-inflated beta negative binomial
+the analysis of kstest.A and kstest.B and lrt.A the data belongs to zero-inflated beta negative binomial
 or beta negative binomial hurdle model.
 }
 \source{

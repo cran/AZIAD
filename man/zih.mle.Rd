@@ -187,7 +187,7 @@ zih.mle(y5,r=10,alpha1=3,alpha2=4,dist="bnb1.zihmle",type="h")
 #4 3.028185 3.756225 0.328 -5274.092
 y6=sample.h1(2000,phi=0.3,dist="normal",mean=10,sigma=2)
 zih.mle(y6,mean=2,sigma=2,dist="normal.zihmle",type="h")
-#10.04307 1.986102 0.29 -4201.544
+#10.01252 1.996997 0.29 -4201.334
 y7=sample.h1(2000,phi=0.3,dist="lognormal",mean=1,sigma=4)
 zih.mle(y7,mean=4,sigma=2,dist="lognorm.zihmle",type="h")
 #0.9305549 3.891624 0.287 -6486.92
