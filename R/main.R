@@ -88,7 +88,7 @@
 #' \item lambda: the maximum likelihood estimate of \eqn{\lambda}.
 #' \item loglik: the value of negative log likelihood with maximum likelihood estimates plugged-in.}
 #'
-#' @references \itemize{\item H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data, accepted for publication in 2019 IEEE EMBS International Conference on Biomedical & Health Informatics (BHI).}
+#' @references \itemize{\item Dousti Mousavi et al. (2023) <doi:10.1080/00949655.2023.2207020>}
 #' @export
 #' @examples
 #' set.seed(001)
@@ -449,7 +449,7 @@ new.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, dist, 
     return(mle)
   }
 }
-library(rmutil);library(foreach);library(extraDistr);library(matrixcalc);library(base);library(corpcor);library(dplyr);library(Rcpp);
+library(foreach);library(extraDistr);library(base);library(corpcor);library(Rcpp);
 
 #' Maximum likelihood estimate for Zero-Inflated or Zero-Altered discrete and continuous distributions.
 #' @description Calculate the Maximum likelihood estimate and the corresponding negative log likelihood value for
@@ -1022,32 +1022,33 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
     #estimation part
     if (!is.na(p0) && type == "h")
     {
-      phi = 1 - m/N
+      phi = 1 - (m/N)
       lik = -fvalue + (N - m) * log(1 - m/N) + m * log(m/N)
       mle = matrix(c(ans[1], ans[2], ans[3], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
     } else if (!is.na(p0) && (m/N) <= (1-p0) && type == "zi")
     {
-      phi=1-m/N/(1-p0)
+      phi=1 - m/N/(1-p0)
       lik = -fvalue + (N - m) * log(1 - m/N) + m * log(m/N)
       mle = matrix(c(ans[1], ans[2], ans[3], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
     }else if (!is.na(p0) && (m/N) > (1-p0) && type == "zi")
     {
-      psi = min(m/N, (1 - p1))
-      phi = (1 - psi)/(1 - p1)
+      psi = min(m/N, 1 - p1)
+      phi = 1 - psi/(1 - p1)
       lik = -fvalue1 + (N - m) * log(1 - psi) + m * log(psi)
       mle = matrix(c(ans1[1], ans1[2], ans1[3], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else
+    } else if (type != "zi" && type != "h"){
       warning("cannot obtain mle with the current model type, the output estimate is derived from general beta binomial distribution.")
-    ans = new.mle(x, n, alpha1, alpha2, lowerbound, upperbound, dist = "bb")
+    ans = new.mle(x, n = n, alpha1 = alpha1, alpha2 = alpha2, lowerbound, upperbound, dist = "bb")
     mle = matrix(c(ans[1], ans[2], ans[3], 0, ans[4]), nrow = 1)
     colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
     return(mle)
+    }
   }
   if (dist == "bb1.zihmle")
   {
@@ -1176,16 +1177,16 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       mle = matrix(c(nnew, ansnew[1], ansnew[2], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    } else if (!is.na(p0) && (m/N) <= (1-p0) && type == "zi")
+    } else if (!is.na(p0) && (m/N) <= (1 - p0) && type == "zi")
     {
       phi=1-m/N/(1-p0)
       lik = -fvalue + (N - m) * log(1 - m/N) + m * log(m/N)
       mle = matrix(c(nnew, ansnew[1], ansnew[2], phi, lik), nrow = 1)
       colnames(mle) = c("n", "alpha1", "alpha2", "phi", "loglik")
       return(mle)
-    }else if (!is.na(p0) && (m/N) > (1-p0) && type == "zi")
+    } else if (!is.na(p0) && (m/N) > (1 - p0) && type == "zi")
     {
-      psi = min(m/N,(1 - p1))
+      psi = min(m/N , (1 - p1))
       phi = 1 - psi/(1 - p1)
       lik = -fvalue1 + (N - m) * log(1 - psi) + m * log(psi)
       mle = matrix(c(nnew1, ansnew1[1], ansnew1[2], phi, lik), nrow = 1)
@@ -1439,7 +1440,7 @@ zih.mle <- function (x, r , p , alpha1 , alpha2 , n, lambda, mean, sigma, type =
       return(mle)
     } else if (!is.na(p0) && (m/N) > (1 - p0) && type == "zi")
     {
-      psi = min(m/N , 1 - p1)
+      psi = min(m/N , (1 - p1))
       phi = 1 - psi/(1 - p1)
       lik = -fvalue1 + (N - m) * log(1 - psi) + m * log(psi)
       mle = matrix(c(rnew1, ansnew1[1], ansnew1[2], phi, lik), nrow = 1)
@@ -2301,12 +2302,12 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     Dn_ori=max(abs(dev))
     if(bootstrap){
       mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages='AZIAD') %do%
-        zih.mle(sample(x, size=N, replace=T),n=mle_ori[1],alpha1=mle_ori[2],alpha2=mle_ori[3],type='zi',lowerbound,upperbound,dist="bb1.zihmle")
+        zih.mle(sample(x, size=N, replace=T),n=mle_ori[1],alpha1=mle_ori[2],alpha2=mle_ori[3],type="zi",lowerbound,upperbound,dist="bb1.zihmle")
       mle_new=t(mle_new)
     }else{
       mle_new=matrix(rep(mle_ori,nsim),ncol=nsim)
     }
-    D2=foreach::foreach(j=1:nsim,.combine=c,.packages=c('extraDistr','AZIAD')) %do%
+    D2=foreach::foreach(j=1:nsim,.combine=c,.packages=c('AZIAD','extraDistr')) %do%
       general.ks(N,n=mle_new[1,j],alpha1=mle_new[2,j],alpha2=mle_new[3,j],dist="bb",type="zi",phi=mle_new[4,j])
     temp=list(r=NULL, p=NULL, alpha1=alpha1, alpha2=alpha2, n=n, lambda=NULL, mean=NULL, sigma=NULL)
   }
@@ -2376,7 +2377,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD','rootSolve')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD')) %do%
         zih.mle(sample(x, size=N, replace=T),sigma=sigma,type='zi',lowerbound,upperbound,dist="halfnorm.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -2395,7 +2396,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD','rootSolve')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD')) %do%
         zih.mle(sample(x, size=N, replace=T),lambda=lambda,type='zi',lowerbound,upperbound,dist="exp.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -2552,7 +2553,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD','rootSolve')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD')) %do%
         zih.mle(sample(x, size=N, replace=T),sigma=sigma,type='h',lowerbound,upperbound,dist="halfnorm.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -2571,7 +2572,7 @@ kstest.A <- function(x, nsim=200, bootstrap=TRUE, dist='poisson', r=NULL, p=NULL
     dev=c(0, stats::ecdf(x)(z)-step_ori(z))
     Dn_ori=max(abs(dev))
     if(bootstrap){
-      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD','rootSolve')) %do%
+      mle_new=foreach::foreach(j=1:nsim,.combine=rbind,.packages=c('AZIAD')) %do%
         zih.mle(sample(x, size=N, replace=T),lambda=lambda,type='h',lowerbound,upperbound,dist="exp.zihmle")
       mle_new=t(mle_new)
     }else{
@@ -4034,13 +4035,13 @@ check.input1<-function(x,dist,lowerbound,upperbound)
 #' FI.ZI(x1,lambda=4,dist="ph")
 #' #$inversefisher
 #' #       [,1]     [,2]
-#' #[1,] 0.237679  0.00000
-#' #[2,] 0.000000 16.12686
+#' #[1,] 0.239799  0.00000
+#' #[2,] 0.000000 16.64774
 #'
 #' #$ConfidenceIntervals
 #' #              [,1]       [,2]
-#' #CI of Phi    0.3587835  0.4192165
-#' #CI of lambda 9.6000082 10.0978060
+#' #CI of Phi    0.3686491  0.4293509
+#' #CI of lambda 9.7483238 10.2540970
 #' set.seed(289)
 #' N=2000;mean=10;sigma=2;phi=0.4;
 #' x<-sample.zi1(N,phi=phi,mean=mean,sigma=sigma,dist="lognormal")
@@ -4083,7 +4084,6 @@ FI.ZI <- function (x, dist= "poisson",
     lambdaest<-lambda
     N=length(x)
     phi=0
-    phiest<-phi
     A11 = (1 - exp(-lambda))/((phi  + (1-phi) * exp(-lambda)) * (1-phi))
     A12 = - exp(-lambda)/(phi + (1-phi) * exp(-lambda))
     A21 = A12
@@ -4112,7 +4112,7 @@ FI.ZI <- function (x, dist= "poisson",
   }
   if (dist=="nb")
   {
-    #y<-stats::rnbinom(N,r,p)
+    #
     mle<-new.mle(x,r=r,p=p,dist="nb",lowerbound,upperbound)
     r=mle[1,1]
     p=mle[1,2]
@@ -4120,6 +4120,8 @@ FI.ZI <- function (x, dist= "poisson",
     pest<-p
     phi=0
     N = length(x)
+    m = 5000;
+    y<-stats::rnbinom(m,r,p)
     p0 = (1-p)^r
     A11 = (1-p0)/(phi+(1-phi) * p0) * (1-phi)
     A12 = (p0/(phi+(1-phi) * p0)) * log(1-p)
@@ -4127,7 +4129,7 @@ FI.ZI <- function (x, dist= "poisson",
     A13 = (p0/(phi+(1-phi) * p0)) * (-r/(1-p))
     A31 = A13
     Cstar=(phi*p0)/(phi+(1-phi) * p0)
-    A22=-(1-phi) * (mean(trigamma(x+r)) - trigamma(r) + Cstar * (log(1-p))^2)
+    A22=-(1-phi) * (mean(trigamma(y+r)) - trigamma(r) + Cstar * (log(1-p))^2)
     A23=-(1-phi) * ((-1/(1-p)) - Cstar * (r * log(1-p)/(1-p)))
     A32=A23
     A33=-(1-phi) * ((-r/(p*(1-p)^2)) + Cstar * (r^2/(1-p)^2))
@@ -4150,7 +4152,6 @@ FI.ZI <- function (x, dist= "poisson",
   }
   if (dist=="bb")
   {
-    #y<-extraDistr::rbbinom(N, size=n, alpha=alpha, beta=beta)
     mle1<-new.mle(x,n=n,alpha1=alpha1,alpha2=alpha2,dist="bb",lowerbound,upperbound)
     N = length(x)
     n=mle1[1,1]
@@ -4158,6 +4159,8 @@ FI.ZI <- function (x, dist= "poisson",
     beta=mle1[1,3]
     phi=0
     nest<-n;alphaest<-alpha;betaest<-beta
+    m = 5000;
+    y<-extraDistr::rbbinom(m, size=n, alpha=alpha, beta=beta)
     p0 = beta(alpha,n+beta)/beta(alpha,beta)
     A11 = (1-p0)/(phi+(1-phi) * p0) * (1-phi)
     A12 = (p0/(phi+(1-phi) * p0)) * (digamma(n+beta) - digamma(n+alpha+beta))
@@ -4166,27 +4169,27 @@ FI.ZI <- function (x, dist= "poisson",
     A31 = A13
     A14 = (p0/(phi+(1-phi) * p0)) * (digamma(n+beta) + digamma(alpha+beta) - digamma(n+alpha+beta) - digamma(alpha))
     A41=A14
-
+    
     Cstar = (phi*p0)/(phi+(1-phi) * p0)
-
-    A22 = -(1-phi) * (trigamma(n+1) - trigamma(n+alpha+beta) + mean(trigamma(n-x+beta)) - mean(trigamma(n-x+1))+
+    
+    A22 = -(1-phi) * (trigamma(n+1) - trigamma(n+alpha+beta) + mean(trigamma(n-y+beta)) - mean(trigamma(n-y+1))+
                         Cstar * (digamma(n+beta) - digamma(n+alpha+beta))^2)
     A23 = -(1-phi) * (-trigamma(n+alpha+beta) +
                         Cstar * (digamma(n+beta) - digamma(n+alpha+beta)) * (digamma(alpha+beta) - digamma(n+alpha+beta)))
     A32 = A23
-    A24 = -(1-phi) * (mean(trigamma(n-x+beta)) - trigamma(n+alpha+beta) +
+    A24 = -(1-phi) * (mean(trigamma(n-y+beta)) - trigamma(n+alpha+beta) +
                         Cstar * (digamma(n+beta) - digamma(n+alpha+beta)) * (digamma(n+beta) + digamma(alpha+beta) -
                                                                                digamma(n+alpha+beta) - digamma(beta)))
     A42 = A24
-    A33 = -(1-phi) * (trigamma(alpha+beta) - trigamma(n+alpha+beta) - trigamma(alpha) + mean(trigamma(x+alpha)) +
+    A33 = -(1-phi) * (trigamma(alpha+beta) - trigamma(n+alpha+beta) - trigamma(alpha) + mean(trigamma(y+alpha)) +
                         Cstar * (digamma(alpha+beta) - digamma(n+alpha+beta))^2)
     A34 = -(1-phi) * (trigamma(alpha+beta) - trigamma(n+alpha+beta) +
                         Cstar * (digamma(alpha+beta) - digamma(n+alpha+beta))*
                         (digamma(n+beta) + digamma(alpha+beta) - digamma(n+alpha+beta) - digamma(beta)))
     A43 = A34
-    A44 = -(1-phi) * (trigamma(alpha+beta) - trigamma(beta) - trigamma(n+alpha+beta) + mean(trigamma(n-x+beta)) +
+    A44 = -(1-phi) * (trigamma(alpha+beta) - trigamma(beta) - trigamma(n+alpha+beta) + mean(trigamma(n-y+beta)) +
                         Cstar * (digamma(n+beta) + digamma(alpha+beta) - digamma(n+alpha+beta) - digamma(beta))^2)
-
+    
     FZIBB = N * matrix(c(A11,A12,A13,A14,A21,A22,A23,A24,A31,A32,A33,
                          A34,A41,A42,A43,A44),ncol=4,nrow=4,byrow=TRUE)
     FZIBB33 = matrix(c(A22,A23,A24,A32,A33,A34,A42,A43,A44), ncol=3,nrow=3,byrow =TRUE)
@@ -4200,24 +4203,25 @@ FI.ZI <- function (x, dist= "poisson",
     }
     crit <- stats::qnorm((1 + 0.95)/2)
     CIn = nest + c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
-
+    
     CIa = alphaest + c(-1, 1) * crit * sqrt(inv.fish[2,2])/sqrt(N)
-
+    
     CIb = betaest + c(-1, 1) * crit * sqrt(inv.fish[3,3])/sqrt(N)
-
+    
     ConfInt=matrix(c(CIn,CIa,CIb),ncol=2,nrow=3,byrow=TRUE)
     rownames(ConfInt) = c("CI of n", "CI of alpha" , "CI of beta")
     return(list(inversefisher=inv.fish,ConfidenceIntervals=ConfInt))
   }
   if (dist=="bnb")
   {
-    #y<-extraDistr::rbnbinom(N, size=r, alpha=alpha, beta=beta)
     mle1<-new.mle(x,r=r,alpha1=alpha1,alpha2=alpha2,dist="bnb",lowerbound,upperbound)
     r=mle1[1,1]
     alpha=mle1[1,2]
     beta=mle1[1,3]
     phi=0
     N = length(x)
+    m = 5000;
+    y<-extraDistr::rbnbinom(m, size=r, alpha=alpha, beta=beta)
     p0=beta(r+alpha,beta)/beta(alpha,beta)
     A11 = (1-p0)/(phi+(1-phi) * p0) * (1-phi)
     A12 = (p0/(phi+(1-phi) * p0)) * (digamma(r+alpha) - digamma(r+alpha+beta))
@@ -4227,24 +4231,24 @@ FI.ZI <- function (x, dist= "poisson",
     A14 = (p0/(phi+(1-phi) * p0)) * (digamma(alpha+beta) - digamma(r+alpha+beta))
     A41=A14
     Cstar = (phi*p0)/(phi+(1-phi) * p0)
-    A22 = -(1-phi) * (trigamma(r+alpha) - trigamma(r) - mean(trigamma(r+x+alpha+beta)) + mean(trigamma(r+x)) +
+    A22 = -(1-phi) * (trigamma(r+alpha) - trigamma(r) - mean(trigamma(r+y+alpha+beta)) + mean(trigamma(r+y)) +
                         Cstar * (digamma(r+alpha) - digamma(r+alpha+beta))^2)
-    A23 = -(1-phi) * (trigamma(r+alpha) - mean(trigamma(r+x+alpha+beta)) +
+    A23 = -(1-phi) * (trigamma(r+alpha) - mean(trigamma(r+y+alpha+beta)) +
                         Cstar * (digamma(r+alpha) - digamma(r+alpha+beta)) * (digamma(r+alpha) +
                                                                                 digamma(alpha+beta) - digamma(r+alpha+beta) - digamma(alpha)))
     A32 = A23
-    A24 = -(1-phi) * (-mean(trigamma(r+x+alpha+beta)) +
+    A24 = -(1-phi) * (-mean(trigamma(r+y+alpha+beta)) +
                         Cstar * (digamma(r+alpha) - digamma(r+alpha+beta)) * (digamma(alpha+beta) - digamma(r+alpha+beta)))
     A42 = A24
-    A33 = -(1-phi) * (trigamma(alpha+r) - trigamma(alpha) + trigamma(alpha+beta) - mean(trigamma(r+x+alpha+beta)) +
+    A33 = -(1-phi) * (trigamma(alpha+r) - trigamma(alpha) + trigamma(alpha+beta) - mean(trigamma(r+y+alpha+beta)) +
                         Cstar * (digamma(r+alpha) + digamma(alpha+beta) - digamma(r+alpha+beta) - digamma(alpha))^2)
-    A34 = -(1-phi) * (-mean(trigamma(r+x+alpha+beta)) + trigamma(alpha+beta) +
+    A34 = -(1-phi) * (-mean(trigamma(r+y+alpha+beta)) + trigamma(alpha+beta) +
                         Cstar * (digamma(r+alpha) + digamma(alpha+beta) - digamma(r+alpha+beta) - digamma(alpha))*
                         (digamma(alpha+beta) - digamma(r+alpha+beta)))
     A43 = A34
-    A44 = -(1-phi) * (trigamma(alpha+beta) - trigamma(beta) - mean(trigamma(r+x+alpha+beta)) + mean(trigamma(x+beta)) +
+    A44 = -(1-phi) * (trigamma(alpha+beta) - trigamma(beta) - mean(trigamma(r+y+alpha+beta)) + mean(trigamma(y+beta)) +
                         Cstar * (digamma(alpha+beta) - digamma(r+alpha+beta))^2)
-
+    
     FZIBNB = matrix(c(A11,A12,A13,A14,A21,A22,A23,A24,A31,A32,A33,
                       A34,A41,A42,A43,A44),ncol=4,nrow=4,byrow=TRUE)
     FZIBNB33= matrix (c(A22,A23,A24,A32,A33,A34,A42,A43,A44), ncol=3,nrow=3,byrow =TRUE)
@@ -4270,12 +4274,7 @@ FI.ZI <- function (x, dist= "poisson",
     lambda=mle[1,1]
     N=length(x)
     phi=0
-    #A11=1 /phi* (1-phi)
-    #A12=0
-    #
-    #A21=A12
     A22=(1-phi)/(lambda^2)
-    #FZIP =  matrix(c(A11,A12,A21,A22),ncol=2,nrow=2,byrow=TRUE)
     inv.fish<-solve(A22)
     crit <- stats::qnorm((1 + 0.95)/2)
     CIlambda = lambda + c(-1, 1) * crit * sqrt(inv.fish)/sqrt(N)
@@ -4389,7 +4388,7 @@ FI.ZI <- function (x, dist= "poisson",
     A21 = A12
     A22 = 1/(phi+(1-phi)*p) * ((1-phi)*(phi*(1-p)+p*(1-phi)+phi*p^2))/(p^2*(1-p))
     FZIgeom = matrix(c(A11,A12,A21,A22),ncol=2,nrow=2,byrow=TRUE)
-
+    
     if(corpcor::is.positive.definite(FZIgeom, tol=1e-8))
     {
       inv.fish<-solve(FZIgeom)
@@ -4409,11 +4408,12 @@ FI.ZI <- function (x, dist= "poisson",
   {
     mle<-zih.mle(x,r=r,p=p,dist="nb.zihmle",type="zi",lowerbound,upperbound)
     N = length(x)
-    y<-stats::rnbinom(N,r,p)
     r=mle[1,1]
     p=mle[1,2]
     phi=mle[1,3]
     rest<-r;pest<-p;phiest<-phi;
+    m = 1e5;
+    y<-stats::rnbinom(m,r,p)
     p0 = (1-p)^r
     A11 = (1-p0)/((phi+(1-phi) * p0) * (1-phi))
     A12 = (p0/(phi+(1-phi) * p0)) * log(1-p)
@@ -4421,7 +4421,7 @@ FI.ZI <- function (x, dist= "poisson",
     A13 = (p0/(phi+(1-phi) * p0)) * (-r/(1-p))
     A31 = A13
     Cstar=(phi*p0)/(phi+(1-phi) * p0)
-
+    
     A22=-(1-phi) * (mean(trigamma(y+r)) - trigamma(r) + Cstar * log(1-p)^2)
     A23=(1-phi) * ((1/(1-p)) + Cstar * (r * log(1-p)/(1-p)))
     A32=A23
@@ -4441,10 +4441,11 @@ FI.ZI <- function (x, dist= "poisson",
   {
     mle<-zih.mle(x,r=r,p=p,dist="nb.zihmle",type="zi",lowerbound,upperbound)
     N = length(x)
-    y<-stats::rnbinom(N,r,p)
     r=mle[1,1]
     p=mle[1,2]
     phi=mle[1,3]
+    m = 1e5;
+    y<-stats::rnbinom(m,r,p)
     rest<-r;pest<-p;phiest<-phi;
     p0 = (p)^r
     A11 = (1-p0)/((phi+(1-phi) * p0) * (1-phi))
@@ -4453,7 +4454,7 @@ FI.ZI <- function (x, dist= "poisson",
     A13 = (p0/(phi+(1-phi) * p0)) * (r/p)
     A31 = A13
     Cstar=(phi*p0)/(phi+(1-phi) * p0)
-
+    
     A22 = -(1-phi) * (mean(trigamma(y+r)) - trigamma(r) + Cstar * log(p)^2)
     A23 = (1-phi) * ((1/p) + Cstar * (r * log(p)/(p)))
     A32=A23
@@ -4470,61 +4471,61 @@ FI.ZI <- function (x, dist= "poisson",
     return(list(inversefisher=inv.fish,ConfidenceIntervals=CIs))
   }
   if (dist=="zibnb")
-  {
-    mle1<-zih.mle(x,r=r,alpha1=alpha1,alpha2=alpha2,dist="bnb.zihmle",type="zi",lowerbound,upperbound)
-    N = length(x)
-    y<-extraDistr::rbnbinom(N, size=r, alpha=alpha1, beta=alpha2)
-    r=mle1[1,1]
-    alpha=mle1[1,2]
-    beta=mle1[1,3]
-    phi=mle1[1,4]
-    rest<-r;alphaest<-alpha;betaest<-beta;phiest<-phi;
-    p0=exp(base::lbeta(r+alpha,beta)-base::lbeta(alpha,beta))
-    A11 = (1-p0)/(phi+(1-phi) * p0) * (1-phi)
-    A12 = (p0/(phi+(1-phi) * p0)) * (digamma(r+alpha) - digamma(r+alpha+beta))
-    A21 = A12
-    A13 = (p0/(phi+(1-phi) * p0)) * (digamma(r+alpha) + digamma(alpha+beta) - digamma(r+alpha+beta) - digamma(alpha))
-    A31 = A13
-    A14 = (p0/(phi+(1-phi) * p0)) * (digamma(alpha+beta) - digamma(r+alpha+beta))
-    A41=A14
-    Cstar = (phi*p0)/(phi+(1-phi) * p0)
-    A22 = -(1-phi) * (trigamma(r+alpha) - trigamma(r) - mean(trigamma(r+y+alpha+beta)) + mean(trigamma(r+y)) +
-                        Cstar * (digamma(r+alpha) - digamma(r+alpha+beta))^2)
-    A23 = -(1-phi) * (trigamma(r+alpha) - mean(trigamma(r+y+alpha+beta)) +
-                        Cstar * (digamma(r+alpha) - digamma(r+alpha+beta)) * (digamma(r+alpha) +
-                                                                                digamma(alpha+beta) - digamma(r+alpha+beta) - digamma(alpha)))
-    A32 = A23
-    A24 = -(1-phi) * (-mean(trigamma(r+y+alpha+beta)) +
-                        Cstar * (digamma(r+alpha) - digamma(r+alpha+beta)) * (digamma(r+alpha) - digamma(r+alpha+beta)))
-    A42 = A24
-    A33 = -(1-phi) * (trigamma(alpha+r) - trigamma(alpha) + trigamma(alpha+beta) - mean(trigamma(r+y+alpha+beta)) +
-                        Cstar * (digamma(r+alpha) + digamma(alpha+beta) - digamma(r+alpha+beta) - digamma(alpha))^2)
-    A34 = -(1-phi) * (-mean(trigamma(r+y+alpha+beta)) + trigamma(alpha+beta) +
-                        Cstar * (digamma(r+alpha) + digamma(alpha+beta) - digamma(r+alpha+beta) - digamma(alpha))*
-                        (digamma(r+beta) - digamma(r+alpha+beta)))
-    A43 = A34
-    A44 = -(1-phi) * (trigamma(alpha+beta) - trigamma(beta) - mean(trigamma(r+y+alpha+beta)) + mean(trigamma(y+beta)) +
-                        Cstar * (digamma(r+alpha) - digamma(r+alpha+beta))^2)
-
-    FZIBNB = matrix(c(A11,A12,A13,A14,A21,A22,A23,A24,A31,A32,A33,
-                      A34,A41,A42,A43,A44),ncol=4,nrow=4,byrow=TRUE)
-    FZIBNB33= matrix (c(A22,A23,A24,A32,A33,A34,A42,A43,A44), ncol=3,nrow=3,byrow =TRUE)
-    if(corpcor::is.positive.definite(FZIBNB, tol=1e-8))
-    {
-      inv.fish<-solve(FZIBNB)
-    }
-    else{
-      a<-QRM::eigenmeth(FZIBNB, delta = 0.001)
-      inv.fish<-solve(a)
-    }
-    crit <- stats::qnorm((1 + 0.95)/2)
-    CIphi = phiest + c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
-    CIr = rest + c(-1, 1) * crit * sqrt(inv.fish[2,2])/sqrt(N)
-    CIa = alphaest + c(-1, 1) * crit * sqrt(inv.fish[3,3])/sqrt(N)
-    CIb = betaest + c(-1, 1) * crit * sqrt(inv.fish[4,4])/sqrt(N)
-    ConfInt=matrix(c(CIphi,CIr,CIa,CIb),ncol=2,nrow=4,byrow=TRUE)
-    rownames(ConfInt) = c("CI of phi","CI of r", "CI of alpha" , "CI of beta")
-    return(list(inversefisher=inv.fish,ConfidenceIntervals=ConfInt))
+  {mle1 <- zih.mle(x, r = r, alpha1 = alpha1, alpha2 = alpha2, dist = "bnb.zihmle", type = "zi", lowerbound, upperbound)
+  N = length(x)
+  r = mle1[1, 1]
+  alpha = mle1[1, 2]
+  beta = mle1[1, 3]
+  phi = mle1[1, 4]
+  m = 2e5
+  y <- extraDistr::rbnbinom(m, size = r, alpha = alpha, beta = beta)
+  p0 = exp(base::lbeta(r + alpha, beta) - base::lbeta(alpha, beta))
+  #p0 = (gamma(r + alpha) * gamma(beta) * gamma(alpha + beta)) / (gamma(alpha) * gamma(beta) * gamma(r + alpha + beta))
+  A11 = (1 - p0)/((phi + ((1 - phi) * p0)) * (1 - phi))
+  #denom = (phi * gamma(r + alpha + beta) * gamma(alpha)) + ((1-phi) * gamma(r + alpha) * gamma(alpha + beta))
+  #A11 = ((gamma(r + alpha + beta) * gamma(alpha)) - (gamma(r + alpha) * gamma(alpha + beta)))/(denom * (1 - phi))
+  A12 = (p0/(phi + ((1 - phi) * p0))) * (digamma(r + alpha) - digamma(r + alpha + beta))
+  #A12 = (gamma(r + alpha) * gamma(alpha + beta)) * (digamma(r + alpha) - digamma(r + alpha + beta)) / denom
+  A21 = A12
+  A13 = (p0/(phi + ((1 - phi) * p0))) * (digamma(r + alpha) + digamma(alpha + beta) - digamma(r + alpha + beta) - digamma(alpha))
+  #A13 = gamma(r + alpha) * gamma(alpha + beta) * (digamma(r + alpha) + digamma(alpha + beta) - digamma(r + alpha + beta) - digamma(alpha))/denom
+  A31 = A13
+  A14 = (p0/(phi + ((1 - phi) * p0))) * (digamma(alpha + beta) - digamma(r + alpha + beta))
+  #A14 = gamma(r + alpha) * gamma(alpha + beta) * (digamma(alpha + beta) - digamma(r + alpha + beta)) /denom
+  A41 = A14
+  Cstar = (phi * p0)/(phi + ((1 - phi) * p0));
+  A22 = -(1 - phi) * ((mean(trigamma(r + y)) - trigamma(r) + trigamma(r + alpha) - mean(trigamma(r + y + alpha + beta))) +
+                        (Cstar * ((digamma(r + alpha) - digamma(r + alpha + beta))^2)))
+  A23 = -(1 - phi) * ((trigamma(r + alpha) - mean(trigamma(r + y + alpha + beta))) +
+                        (Cstar * (digamma(r + alpha) - digamma(r + alpha + beta)) * (digamma(r + alpha) + digamma(alpha + beta) - digamma(r + alpha + beta) - digamma(alpha))))
+  A32 = A23
+  A24 = -(1 - phi) * ((-mean(trigamma(r + y + alpha + beta))) + 
+                        (Cstar * (digamma(r + alpha) - digamma(r + alpha + beta)) * (digamma(alpha + beta) - digamma(r + alpha + beta))))
+  A42 = A24
+  A33 = -(1 - phi) * ((trigamma(r + alpha) - mean(trigamma(r + y + alpha + beta)) + trigamma(alpha + beta) - trigamma(alpha)) + 
+                        (Cstar * ((digamma(r + alpha) + digamma(alpha + beta) - digamma(r + alpha + beta) - digamma(alpha))^2)))
+  A34 = -(1 - phi) * ((-mean(trigamma(r + y + alpha + beta)) + trigamma(alpha + beta)) +
+                        (Cstar * (digamma(r + alpha) + digamma(alpha + beta) - digamma(r + alpha + beta) - digamma(alpha)) * (digamma(alpha + beta) - digamma(r + alpha + beta))))
+  A43 = A34
+  A44 = -(1 - phi) * ((mean(trigamma(y +  beta)) - mean(trigamma(r + y + alpha + beta)) + trigamma(alpha + beta) - trigamma(beta))  + 
+                        (Cstar * ((digamma(alpha + beta) - digamma(r + alpha + beta))^2)))
+  FZIBNB = matrix(c(A11, A12, A13, A14, A21, A22, A23, A24, A31, A32, A33, A34, A41, A42, A43, A44), ncol = 4, nrow = 4, byrow = TRUE)
+  FZIBNB33 = matrix(c(A22, A23, A24, A32, A33, A34, A42, A43, A44), ncol = 3, nrow = 3, byrow = TRUE)
+  if (corpcor::is.positive.definite(FZIBNB, tol = 1e-08)) {
+    inv.fish <- solve(FZIBNB)
+  }
+  else {
+    a <- QRM::eigenmeth(FZIBNB, delta = 0.001)
+    inv.fish <- solve(a)
+  }
+  crit <- stats::qnorm((1 + 0.95)/2)
+  CIphi = phi + c(-1, 1) * crit * sqrt(inv.fish[1, 1])/sqrt(N)
+  CIr = r + c(-1, 1) * crit * sqrt(inv.fish[2, 2])/sqrt(N)
+  CIa = alpha + c(-1, 1) * crit * sqrt(inv.fish[3, 3])/sqrt(N)
+  CIb = beta + c(-1, 1) * crit * sqrt(inv.fish[4, 4])/sqrt(N)
+  ConfInt = matrix(c(CIphi, CIr, CIa, CIb), ncol = 2, nrow = 4, byrow = TRUE)
+  rownames(ConfInt) = c("CI of phi", "CI of r", "CI of alpha", "CI of beta")
+  return(list(inversefisher = inv.fish, ConfidenceIntervals = ConfInt))
   }
   if (dist=="ziexp")
   {
@@ -4573,7 +4574,7 @@ FI.ZI <- function (x, dist= "poisson",
     CIphi = phiest + c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
     CIm = meanest + c(-1, 1) * crit * sqrt(inv.fish[2,2])/sqrt(N)
     CIs = sigmaest + c(-1, 1) * crit * sqrt(inv.fish[3,3])/sqrt(N)
-
+    
     ConfInt=matrix(c(CIphi,CIm,CIs),ncol=2,nrow=3,byrow=TRUE)
     rownames(ConfInt) = c("CI of phi","CI of mean", "CI of sigma")
     return(list(inversefisher=inv.fish,ConfidenceIntervals=ConfInt))
@@ -4664,7 +4665,7 @@ FI.ZI <- function (x, dist= "poisson",
     A21 = A12
     A22 = (1-phi)/((p^2)*(1-p))
     FZIgeom = matrix(c(A11,A12,A21,A22),ncol=2,nrow=2,byrow=TRUE)
-
+    
     if(corpcor::is.positive.definite(FZIgeom, tol=1e-8))
     {
       inv.fish<-solve(FZIgeom)
@@ -4684,11 +4685,12 @@ FI.ZI <- function (x, dist= "poisson",
   {
     mle<-zih.mle(x,r=r,p=p,dist="nb.zihmle",type="h",lowerbound,upperbound)
     N = length(x)
-    y<-stats::rnbinom(N,r,p)
     r=mle[1,1]
     p=mle[1,2]
     phi=mle[1,3]
     rest<-r;pest<-p;phiest<-phi;
+    m = 1e5;
+    y<-stats::rnbinom(m,r,p)
     p0 = exp(log((1-p)^r))
     A11 = 1/(phi * (1-phi))
     A12 = 0
@@ -4715,14 +4717,15 @@ FI.ZI <- function (x, dist= "poisson",
   {
     mle1<-zih.mle(x,n=n,alpha1=alpha1,alpha2=alpha2,dist="bb.zihmle",type="h",lowerbound,upperbound)
     N = length(x)
-    y<-extraDistr::rbbinom(N, size=n, alpha=alpha1, beta=alpha2)
+    
     n=mle1[1,1]
     alpha=mle1[1,2]
     beta=mle1[1,3]
     phi=mle1[1,4]
-
+    m= 1e5;
+    y<-extraDistr::rbbinom(m, size=n, alpha=alpha, beta=alpha)
     p0 = beta(alpha,n+beta)/beta(alpha,beta)
-
+    
     A11 = 1/(phi*(1-phi))
     A12 = 0
     A21 = A12
@@ -4730,10 +4733,10 @@ FI.ZI <- function (x, dist= "poisson",
     A31 = A13
     A14 = 0
     A41=A14
-
+    
     Bstar = -(1-phi)/(1-p0)
     Cstar = p0/(1-p0)
-
+    
     A22 = Bstar * ((trigamma(n+1) - trigamma(n+alpha+beta) + mean(trigamma(n-y+beta)) - mean(trigamma(n-y+1))) +
                      (Cstar * ((digamma(n+beta) - digamma(n+alpha+beta))^2)))
     A23 = Bstar * (-trigamma(n+alpha+beta) +
@@ -4750,10 +4753,10 @@ FI.ZI <- function (x, dist= "poisson",
     A43 = A34
     A44 = Bstar * ((trigamma(alpha+beta) - trigamma(beta) - trigamma(n+alpha+beta) + mean(trigamma(n-y+beta))) +
                      (Cstar * ((digamma(n+beta) + digamma(alpha+beta) - digamma(n+alpha+beta) - digamma(beta))^2)))
-
+    
     FZIBB = matrix(c(A11,A12,A13,A14,A21,A22,A23,A24,A31,A32,A33,A34,A41,A42,A43,A44),ncol=4,nrow=4,byrow=TRUE)
     FZIBB33 = matrix(c(A22,A23,A24,A32,A33,A34,A42,A43,A44), ncol=3,nrow=3,byrow =TRUE)
-
+    
     if(corpcor::is.positive.definite(FZIBB, tol=1e-8))
     {
       inv.fish<-solve(FZIBB)
@@ -4762,7 +4765,7 @@ FI.ZI <- function (x, dist= "poisson",
       a<-QRM::eigenmeth(FZIBB, delta = 0.001)
       inv.fish<-solve(a)
     }
-
+    
     crit <- stats::qnorm((1 + 0.95)/2)
     CIphi = phi+ c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
     CIn = n + c(-1, 1) * crit * sqrt(inv.fish[2,2])/sqrt(N)
@@ -4776,11 +4779,12 @@ FI.ZI <- function (x, dist= "poisson",
   {
     mle1<-zih.mle(x,r=r,alpha1=alpha1,alpha2=alpha2,dist="bnb.zihmle",type="h",lowerbound,upperbound)
     N = length(x)
-    y<-extraDistr::rbbinom(N, size=r, alpha=alpha1, beta=alpha2)
     r=mle1[1,1]
     alpha=mle1[1,2]
     beta=mle1[1,3]
     phi=mle1[1,4]
+    m = 1e5;
+    y<-extraDistr::rbbinom(m, size=r, alpha=alpha, beta=alpha)
     rest<-r;alphaest<-alpha;betaest<-beta;phiest<-phi;
     p0=beta(r+alpha,beta)/beta(alpha,beta)
     A11 = 1/((1-phi) * phi)
@@ -4807,11 +4811,11 @@ FI.ZI <- function (x, dist= "poisson",
     A43 = A34
     A44 = -((1-phi)/(1-p0)) * (trigamma(alpha+beta) - trigamma(beta) - mean(trigamma(r+y+alpha+beta)) + mean(trigamma(y+beta)) +
                                  Cstar * (digamma(r+alpha) - digamma(r+alpha+beta))^2)
-
+    
     FZIBNB = matrix(c(A11,A12,A13,A14,A21,A22,A23,A24,A31,A32,A33,
                       A34,A41,A42,A43,A44),ncol=4,nrow=4,byrow=TRUE)
     FZIBNB33= matrix (c(A22,A23,A24,A32,A33,A34,A42,A43,A44), ncol=3,nrow=3,byrow =TRUE)
-
+    
     if(corpcor::is.positive.definite(FZIBNB, tol=1e-8))
     {
       inv.fish<-solve(FZIBNB)
@@ -4820,7 +4824,7 @@ FI.ZI <- function (x, dist= "poisson",
       a<-QRM::eigenmeth(FZIBNB, delta = 0.001)
       inv.fish<-solve(a)
     }
-
+    
     crit <- stats::qnorm((1 + 0.95)/2)
     CIphi = phiest + c(-1, 1) * crit * sqrt(inv.fish[1,1])/sqrt(N)
     CIr = rest + c(-1, 1) * crit * sqrt(inv.fish[2,2])/sqrt(N)
@@ -4838,8 +4842,8 @@ FI.ZI <- function (x, dist= "poisson",
 #'A data set containing ofp (number of physician office visit) of 4406 individuals.
 #'
 #' @format
-#' The original data set is based on the work of Deb and Trivedi (1997) analyze data on 4406 individuals, aged 66 and over, who are covered
-#' by Medicare, a public insurance program. Originally obtained from the US National Medical
+#' The original data set is based on the work of Deb and Trivedi (1997) analyze data on 4406 individuals, 
+#' aged 66 and over, who are covered by Medicare, a public insurance program. Originally obtained from the US National Medical
 #' Expenditure Survey (NMES) for 1987/88, the data are available from the data archive of
 #' the Journal of Applied Econometrics at http://www.econ.queensu.ca/jae/1997-v12.3/deb-trivedi/.
 #' In AZIAD package we work with the number of physicians office visits for the patients.Based on
@@ -4857,6 +4861,4 @@ FI.ZI <- function (x, dist= "poisson",
 #' \donttest{d2=kstest.A(ofp,nsim=200,bootstrap=TRUE,dist="zibnb")}
 #' \donttest{lrt.A(d1,d2)}       #0
 "ofp"
-
-
 

@@ -12,7 +12,7 @@ alpha1=NA,alpha2=NA,n=NA,mean=NA,sigma=NA)
 
 \item{phi}{The structural parameter \eqn{\phi}, should be a positive value within (0,1).}
 
-\item{dist}{The corresponding standard distribution. Can be one of {'poisson', 'geometric','nb','bb', 'bnb','normal', 'lognormal', 'halfnormal','exponential'}, which corresponds to Poisson, geometric, negative binomial, beta binomial, beta negative binomial, normal, log normal, hal fnormal, and exponential distributions respectively.}
+\item{dist}{The corresponding standard distribution. Can be one of 'poisson', 'geometric','nb','bb', 'bnb','normal', 'lognormal', 'halfnormal','exponential', which corresponds to Poisson, geometric, negative binomial, beta binomial, beta negative binomial, normal, lognormal, halfnormal, and exponential distributions respectively.}
 
 \item{lambda}{A value for the parameter of Poisson distribution. Should be a positive number.}
 

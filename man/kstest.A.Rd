@@ -15,13 +15,7 @@ lowerbound=1e-2,upperbound=1e4,parallel=FALSE)
 
 \item{bootstrap}{Whether to generate bootstrapped samples or not. See Details. 'TRUE' or any numeric non-zero value indicates the generation of bootstrapped samples. The default is 'TRUE'.}
 
-\item{dist}{The distribution used as the null hypothesis. Can be one of {'poisson', 'geometric',
-'nb', 'nb1', 'bb', 'bb1', 'bnb', 'bnb1', 'normal', 'lognormal', 'halfnormal', 'exponential',
-'zip', 'zigeom', 'zinb', 'zibb',  zibnb', 'zinormal', 'zilognorm', 'zihalfnorm', 'ziexp',
-'ph', 'geomh','nbh','bbh','bnbh', 'normalh', 'lognormh', 'halfnormh', and 'exph' }, which corresponds to Poisson, geometric, negative binomial, negative binomial1,
- beta binomial, beta binomial1, beta negative binomial, beta negative binomial1,
- normal, half normal, log normal, and exponential distributions and their zero-inflated as well as hurdle version, respectively.
- Defult is 'poisson'.}
+\item{dist}{The distribution used as the null hypothesis. Can be one of poisson,geometric,nb,bb,bnb,normal,halfnormal,lognormal,exponential,zip,zigeom,zinb,zibb,zibnb,zinormal,zilognorm,zohalfnorm,ziexp,ph,geomh,nbh,bbh,bnbh, which corresponds to Poisson, geometric, negative binomial, negative binomial1, beta binomial, beta binomial1, beta negative binomial, beta negative binomial1, normal, half normal, log normal, and exponential distributions and their zero-inflated as well as hurdle version, respectively. Defult is 'poisson'.}
 
 \item{r}{An initial value of the number of success before which m failures are observed, where m is the element of x. Must be a positive number, but not required to be an integer.}
 

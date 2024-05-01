@@ -25,11 +25,7 @@ new.mle(x,r,p,alpha1,alpha2,n,lambda,mean,sigma,dist,lowerbound=0.01,upperbound=
 
 \item{sigma}{An initial value of the standard deviation. Must be a positive real number.}
 
-\item{dist}{The distribution used to calculate the maximum likelihood estimate. Can
- be one of {'poisson', 'geometric', 'nb', 'nb1', 'bb', 'bb1', 'bnb', 'bnb1', 'normal', 'halfnormal',
-'lognormal', 'exponential'}, which corresponds to Poisson, geometric, negative binomial, negative binomial1,
- beta binomial, beta binomial1, beta negative binomial, beta negative binomial1,
- normal, half normal, log normal, and exponential  distributions.}
+\item{dist}{The distribution used to calculate the maximum likelihood estimate. Can be one of 'poisson', 'geometric', 'nb', 'nb1', 'bb', 'bb1', 'bnb', 'bnb1', 'normal', 'halfnormal', 'lognormal', 'exponential', which corresponds to Poisson geometric, negative binomial, negative binomial1, beta binomial, beta binomial1, beta negative binomial, beta negative binomial1, normal, half normal, log normal, and exponential distributions.}
 
 \item{lowerbound}{A lower searching bound used in the optimization of likelihood function. Should be a small positive number. The default is 1e-2.}
 

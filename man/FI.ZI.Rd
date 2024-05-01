@@ -9,18 +9,9 @@ FI.ZI(x,dist="poisson",r=NULL,p=NULL,alpha1=NULL,alpha2=NULL,
 n=NULL,lambda=NULL,mean=NULL,sigma=NULL,lowerbound=0.01,upperbound=10000)
 }
 \arguments{
-\item{x}{A vector of count data. Should be non-negative integers for discrete cases.  Random generation for continuous cases.}
+\item{x}{A vector of count data. Should be non-negative integers for discrete cases. Random generation for continuous cases.}
 
-\item{dist}{The distribution used to calculate the inverse of fisher information and confidence interval. It can be one of
-{'poisson','geometric','nb','bb','bnb','normal','halfnormal','lognormal','exponential',
-'zip','zigeom','zinb','zibb','zibnb', 'zinormal','zilognorm','zohalfnorm','ziexp',
-'ph','geomh','nbh','bbh','bnbh'} which corresponds to general Poisson, geometric, negative binomial, beta binomial,
- beta negative binomial, normal, log normal, half normal, exponential, Zero-Inflated Poisson,
- Zero-Inflated geometric, Zero-Inflated negative binomial, Zero-Inflated beta binomial,
- Zero-Inflated beta negative binomial, Zero-Inflated/hurdle normal, Zero-Inflated/hurdle log normal,
- Zero-Inflated/hurdle half normal, Zero-Inflated/hurdle exponential, Zero-Hurdle Poisson,
- Zero-Hurdle geometric, Zero-Hurdle negative binomial, Zero-Hurdle beta binomial, and
- Zero-Hurdle beta negative binomial distributions, respectively.}
+\item{dist}{The distribution used to calculate the inverse of fisher information and confidence interval. It can be one of poisson,geometric,nb,bb,bnb,normal,halfnormal,lognormal,exponential,zip,zigeom,zinb,zibb,zibnb,zinormal,zilognorm,zohalfnorm,ziexp,ph,geomh,nbh,bbh,bnbh which corresponds to general Poisson, geometric, negative binomial, beta binomial, beta negative binomial, normal, log normal, half normal, exponential, Zero-Inflated Poisson, Zero-Inflated geometric, Zero-Inflated negative binomial, Zero-Inflated beta binomial, Zero-Inflated beta negative binomial, Zero-Inflated/hurdle normal, Zero-Inflated/hurdle log normal, Zero-Inflated/hurdle half normal, Zero-Inflated/hurdle exponential, Zero-Hurdle Poisson, Zero-Hurdle geometric, Zero-Hurdle negative binomial, Zero-Hurdle beta binomial, and Zero-Hurdle beta negative binomial distributions, respectively.}
 
 \item{r}{An initial value of the number of success before which m failures are observed, where m is the element of x. Must be a positive number, but not required to be an integer.}
 
@@ -46,9 +37,8 @@ n=NULL,lambda=NULL,mean=NULL,sigma=NULL,lowerbound=0.01,upperbound=10000)
 A list containing the inverse of the fisher information matrix and the corresponding 95\% confidence interval for all the parameters in the model.
 }
 \description{
-Computes the inverse of the fisher information matrix for Poisson, geometric, negative binomial, beta binomial,
-beta negative binomial, normal, lognormal, half normal, and exponential distributions and their zero-inflated and hurdle versions along with the confidence intervals
-of all parameters in the model.
+Computes the inverse of the fisher information matrix for Poisson, geometric, negative binomial, beta binomia,
+beta negative binomial, normal, lognormal, half normal, and exponential distributions and their zero-inflated and hurdle versions along with the confidence intervals of all parameters in the model.
 }
 \details{
 FI.ZI calculate the inverse of the fisher information matrix and the corresponding confidence interval of

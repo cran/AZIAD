@@ -28,12 +28,7 @@ type=c("zi","h"),dist,lowerbound=0.01,upperbound = 10000 )
 
 \item{type}{the type of distribution used to calculate the sample estimate, where 'zi' stand for zero-inflated and 'h'  stands for hurdle distributions.}
 
-\item{dist}{The distribution used to calculate the maximum likelihood estimate. Can be one
-of {'poisson.zihmle', 'geometric.zihmle', 'nb.zihmle', 'nb1.zihmle', 'bb.zihmle', 'bb1.zihmle',
- 'bnb.zihmle', 'bnb1.zihmle', 'normal.zihmle', 'halfnorm.zihmle', 'lognorm.zimle', 'exp.zihmle'} which
- corresponds to Zero-Inflated or Zero-Hurdle Poisson, geometric, negative binomial, negative binomial1,
- beta binomial, beta binomial1, beta negative binomial, beta negative binomial1,
- normal, log normal, half normal, and exponential distributions.}
+\item{dist}{The distribution used to calculate the maximum likelihood estimate. Can be one of 'poisson.zihmle', 'geometric.zihmle', 'nb.zihmle', 'nb1.zihmle', 'bb.zihmle', 'bb1.zihmle', 'bnb.zihmle', 'bnb1.zihmle', 'normal.zihmle', 'halfnorm.zihmle', 'lognorm.zimle', 'exp.zihmle', which corresponds to Zero-Inflated or Zero-Hurdle Poisson, geometric, negative binomial, negative binomial1, beta binomial, beta binomial1, beta negative binomial, beta negative binomial1, normal, log normal, half normal, and exponential distributions.}
 
 \item{lowerbound}{A lower searching bound used in the optimization of likelihood function. Should be a small positive number. The default is 1e-2.}
 
